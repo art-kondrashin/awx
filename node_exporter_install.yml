@@ -106,11 +106,6 @@
       become: yes
       notify: reload_prometheus
 
-    - name: restart node_exporter
-      systemd:
-        name: node_exporter
-        state: restarted
-
     - name: restart prometheus (fallback)
       systemd:
         name: "{{ prometheus_service }}"
