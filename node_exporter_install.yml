@@ -106,11 +106,6 @@
       become: yes
       notify: reload_prometheus
 
-  handlers:
-    - name: reload systemd
-      systemd:
-        daemon_reload: yes
-
     - name: restart node_exporter
       systemd:
         name: node_exporter
