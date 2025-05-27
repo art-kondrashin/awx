@@ -104,12 +104,4 @@
         mode: "0644"
       delegate_to: 185.86.146.169
       become: yes
-      notify: reload_prometheus
 
-    - name: restart prometheus (fallback)
-      systemd:
-        name: "{{ prometheus_service }}"
-        state: restarted
-      delegate_to: 185.86.146.169
-      become: yes
-      listen: reload prometheus
