@@ -107,7 +107,7 @@
         create: yes
         insertafter: '^scrape_configs:'
         state: present
-      delegate_to: localhost
+      delegate_to: 185.86.146.169
       become: yes
       notify: reload prometheus
 
