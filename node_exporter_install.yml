@@ -95,21 +95,16 @@
         state: started
 
     # ---------- Регистрируем target в Prometheus ----------
-    - name: Ensure scrape job exists and host line present
-      blockinfile:
-        path: "{{ prometheus_config }}"
-        marker: "# {mark} MANAGED BY AWX NODE_EXPORTER"
-        block: |
-          - job_name: 'node_exporter'
-            static_configs:
-              - targets:
-                  - '{{ node_target }}'
-        create: yes
-        insertafter: '^scrape_configs:'
-        state: present
+    - name: Render node_exporter SD file
+      template:
+        src: node_exporter.json.j2
+        dest: /etc/prometheus/file_sd/node_exporter.json
+        owner: prometheus
+        group: prometheus
+        mode: "0644"
       delegate_to: 185.86.146.169
       become: yes
-      notify: reload prometheus
+      notify: reload_prometheus
 
   handlers:
     - name: reload systemd
@@ -120,17 +115,6 @@
       systemd:
         name: node_exporter
         state: restarted
-
-    # --- Prometheus перезагрузка ---
-    - name: reload prometheus via API
-      uri:
-        url: "http://localhost:9090/-/reload"
-        method: POST
-        status_code: 200
-      delegate_to: 185.86.146.169
-      become: yes
-      ignore_errors: true
-      listen: reload prometheus
 
     - name: restart prometheus (fallback)
       systemd:
