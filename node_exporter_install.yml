@@ -127,7 +127,7 @@
         url: "http://localhost:9090/-/reload"
         method: POST
         status_code: 200
-      delegate_to: localhost
+      delegate_to: 185.86.146.169
       become: yes
       ignore_errors: true
       listen: reload prometheus
@@ -136,6 +136,6 @@
       systemd:
         name: "{{ prometheus_service }}"
         state: restarted
-      delegate_to: localhost
+      delegate_to: 185.86.146.169
       become: yes
       listen: reload prometheus
