@@ -1,0 +1,140 @@
+---
+- name: Install Node Exporter on managed hosts and register them in Prometheus
+  hosts: awx             
+  become: yes
+  serial: 1                
+
+  vars:
+    # ====== Node Exporter ======
+    node_exporter_version: "1.9.1"
+    node_exporter_user: "node_exporter"
+    node_exporter_bin_dir: "/usr/local/bin"
+    node_exporter_unit: "/etc/systemd/system/node_exporter.service"
+
+    # ====== Prometheus (на AWX-хосте) ======
+    prometheus_config: "/etc/prometheus/prometheus.yml"
+    prometheus_service: "prometheus"
+
+    # autodetect arch: x86_64 → amd64, aarch64 → arm64, иначе armv7
+    node_exporter_arch: >-
+      {{ 'amd64'  if ansible_architecture == 'x86_64'  else
+         'arm64'  if ansible_architecture == 'aarch64' else
+         'armv7' }}
+
+    node_exporter_url: >-
+      https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}.tar.gz
+
+    node_target: "{{ (ansible_host | default(inventory_hostname)) }}:9100"
+
+  tasks:
+    # ---------- установка node_exporter ----------
+    - name: Ensure system user exists
+      user:
+        name: "{{ node_exporter_user }}"
+        shell: /usr/sbin/nologin
+        system: yes
+        create_home: no
+
+    - name: Download tarball
+      get_url:
+        url: "{{ node_exporter_url }}"
+        dest: "/tmp/node_exporter-{{ node_exporter_version }}.tar.gz"
+        mode: 0644
+      register: dl_nodeexp
+
+    - name: Unpack tarball
+      unarchive:
+        src: "{{ dl_nodeexp.dest }}"
+        dest: "/tmp"
+        remote_src: yes
+      when: dl_nodeexp.changed
+
+    - name: Install binary
+      copy:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}/node_exporter"
+        dest: "{{ node_exporter_bin_dir }}/node_exporter"
+        owner: "{{ node_exporter_user }}"
+        group: "{{ node_exporter_user }}"
+        mode: 0755
+      notify: restart node_exporter
+
+    - name: Deploy systemd unit
+      copy:
+        dest: "{{ node_exporter_unit }}"
+        owner: root
+        group: root
+        mode: 0644
+        content: |
+          [Unit]
+          Description=Prometheus Node Exporter
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          User={{ node_exporter_user }}
+          Group={{ node_exporter_user }}
+          Type=simple
+          ExecStart={{ node_exporter_bin_dir }}/node_exporter \
+            --web.listen-address=:9100 \
+            --collector.systemd \
+            --collector.processes
+          Restart=on-failure
+          RestartSec=5s
+
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - reload systemd
+        - restart node_exporter
+
+    - name: Enable & start service
+      systemd:
+        name: node_exporter
+        enabled: yes
+        state: started
+
+    # ---------- Регистрируем target в Prometheus ----------
+    - name: Ensure scrape job exists and host line present
+      blockinfile:
+        path: "{{ prometheus_config }}"
+        marker: "# {mark} MANAGED BY AWX NODE_EXPORTER"
+        block: |
+          - job_name: 'node_exporter'
+            static_configs:
+              - targets:
+                  - '{{ node_target }}'
+        create: yes
+        insertafter: '^scrape_configs:'
+        state: present
+      delegate_to: localhost
+      become: yes
+      notify: reload prometheus
+
+  handlers:
+    - name: reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: restart node_exporter
+      systemd:
+        name: node_exporter
+        state: restarted
+
+    # --- Prometheus перезагрузка ---
+    - name: reload prometheus via API
+      uri:
+        url: "http://localhost:9090/-/reload"
+        method: POST
+        status_code: 200
+      delegate_to: localhost
+      become: yes
+      ignore_errors: true
+      listen: reload prometheus
+
+    - name: restart prometheus (fallback)
+      systemd:
+        name: "{{ prometheus_service }}"
+        state: restarted
+      delegate_to: localhost
+      become: yes
+      listen: reload prometheus
