@@ -1,8 +1,8 @@
 [
   {
     "targets": [
-{% for h in groups['all'] | map('extract', hostvars, ['ansible_host']) | default(hostvars[h].inventory_hostname) %}
-      "{{ h }}:9100"{% if not loop.last %},{% endif %}
+{% for host in ansible_play_hosts_all | sort %}
+      "{{ (hostvars[host].ansible_host | default(host)) }}:9100"{% if not loop.last %},{% endif %}
 {% endfor %}
     ]
   }
