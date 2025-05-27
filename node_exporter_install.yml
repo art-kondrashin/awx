@@ -1,6 +1,6 @@
 ---
 - name: Install Node Exporter on managed hosts and register them in Prometheus
-  hosts: awx             
+  hosts: nodes             
   become: yes
   serial: 1                
 
