@@ -1,9 +1,0 @@
-[
-  {
-    "targets": [
-{% for h in groups['nodes'] | map('extract', hostvars, ['ansible_host']) | default(hostvars[h].inventory_hostname) %}
-      "{{ h }}:9100"{% if not loop.last %},{% endif %}
-{% endfor %}
-    ]
-  }
-]
