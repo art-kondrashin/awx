@@ -9,13 +9,13 @@ jobs:
     collectors: [database_1h]
     static_configs:
       - targets:
-          - "{{ 'postgres://%s:%s@localhost:5432/postgres?application_name=sql_exporter&target_session_attrs=primary&sslmode=disable' | format(sql_exporter_db_user, sql_exporter_db_password) }}"
+          postgres: "{{ 'postgres://%s:%s@localhost:5432/postgres?application_name=sql_exporter&target_session_attrs=primary&sslmode=disable' | format(sql_exporter_db_user, sql_exporter_db_password) }}"
 
   - job_name: instance_metrics
     collectors: [instance_10s, instance_1m, instance_1h]
     static_configs:
       - targets:
-          - "{{ 'postgres://%s:%s@localhost:5432/postgres?application_name=sql_exporter&target_session_attrs=primary&sslmode=disable' | format(sql_exporter_db_user, sql_exporter_db_password) }}"
+          base: "{{ 'postgres://%s:%s@localhost:5432/postgres?application_name=sql_exporter&target_session_attrs=primary&sslmode=disable' | format(sql_exporter_db_user, sql_exporter_db_password) }}"
 
 collector_files:
   - "*.collector.yml"
