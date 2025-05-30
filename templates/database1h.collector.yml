@@ -1,0 +1,755 @@
+collector_name: database_1h
+
+# Similar to global.min_interval, but applies to the queries defined by this collector only.
+min_interval: 1h
+
+metrics:
+  - metric_name: pg_idx_scan
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: counter
+    help: Number of index scans initiated by the index
+    values: [pg_idx_scan]
+    query_ref: idx_stats
+  - metric_name: pg_idx_tup_read
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: counter
+    help: Number of index entries returned by scans on the index
+    values: [pg_idx_tup_read]
+    query_ref: idx_stats
+  - metric_name: pg_idx_tup_fetch
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: counter
+    help: Number of live table rows fetched by simple index scans using the index
+    values: [pg_idx_tup_fetch]
+    query_ref: idx_stats
+  - metric_name: pg_idx_blks_read
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: counter
+    help: Number of disk blocks read from this index
+    values: [pg_idx_blks_read]
+    query_ref: idx_stats
+  - metric_name: pg_idx_blks_hit
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: counter
+    help: Number of buffer hits in this index
+    values: [pg_idx_blks_hit]
+    query_ref: idx_stats
+  - metric_name: pg_idx_size
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: gauge
+    help: Disk space used by this index
+    values: [pg_idx_size]
+    query_ref: idx_stats
+  - metric_name: pg_idx_is_invalid_int
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: gauge
+    help: Is invalid index
+    values: [pg_idx_is_invalid_int]
+    query_ref: idx_stats
+  - metric_name: pg_idx_is_pk_int
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: gauge
+    help: Is primary key index
+    values: [pg_idx_is_pk_int]
+    query_ref: idx_stats
+  - metric_name: pg_idx_is_uq_or_exc
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: gauge
+    help: Is unique or exclusion constraint
+    values: [pg_idx_is_uq_or_exc]
+    query_ref: idx_stats
+  - metric_name: pg_idx_wastedbytes
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - indexrelname
+      - indexdef
+    type: gauge
+    help: Index wasted bytes
+    values: [pg_idx_wastedbytes]
+    query_ref: idx_stats
+  - metric_name: pg_table_seq_scan
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of sequential scans initiated on the table
+    values: [pg_table_seq_scan]
+    query_ref: table_stats
+  - metric_name: pg_table_seq_tup_read
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of live rows fetched by sequential scans
+    values: [pg_table_seq_tup_read]
+    query_ref: table_stats
+  - metric_name: pg_table_idx_scan
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of index scans initiated on the table
+    values: [pg_table_idx_scan]
+    query_ref: table_stats
+  - metric_name: pg_table_idx_tup_fetch
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of live rows fetched by index scans
+    values: [pg_table_idx_tup_fetch]
+    query_ref: table_stats
+  - metric_name: pg_table_n_tup_ins
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of rows inserted
+    values: [pg_table_n_tup_ins]
+    query_ref: table_stats
+  - metric_name: pg_table_n_tup_upd
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of rows updated
+    values: [pg_table_n_tup_upd]
+    query_ref: table_stats
+  - metric_name: pg_table_n_tup_del
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of rows deleted
+    values: [pg_table_n_tup_del]
+    query_ref: table_stats
+  - metric_name: pg_table_n_tup_hot_upd
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of rows HOT updated (i.e., with no separate index update required)
+    values: [pg_table_n_tup_hot_upd]
+    query_ref: table_stats
+  - metric_name: pg_table_n_live_tup
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Estimated number of live rows
+    values: [pg_table_n_live_tup]
+    query_ref: table_stats
+  - metric_name: pg_table_n_dead_tup
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Estimated number of dead rows
+    values: [pg_table_n_dead_tup]
+    query_ref: table_stats
+  - metric_name: pg_table_n_mod_since_analyze
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Estimated number of rows changed since last analyze
+    values: [pg_table_n_mod_since_analyze]
+    query_ref: table_stats
+  - metric_name: pg_table_seconds_since_last_vacuum
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Number of seconds passed since last vacuum
+    values: [pg_table_seconds_since_last_vacuum]
+    query_ref: table_stats
+  - metric_name: pg_table_seconds_since_last_analyze
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Number of seconds passed since last analyze
+    values: [pg_table_seconds_since_last_analyze]
+    query_ref: table_stats
+  - metric_name: pg_table_vacuum_count
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of times this table has been manually vacuumed (not counting VACUUM FULL)
+    values: [pg_table_vacuum_count]
+    query_ref: table_stats
+  - metric_name: pg_table_autovacuum_count
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of times this table has been vacuumed by the autovacuum daemon
+    values: [pg_table_autovacuum_count]
+    query_ref: table_stats
+  - metric_name: pg_table_analyze_count
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of times this table has been manually analyzed
+    values: [pg_table_analyze_count]
+    query_ref: table_stats
+  - metric_name: pg_table_autoanalyze_count
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of times this table has been analyzed by the autovacuum daemon
+    values: [pg_table_autoanalyze_count]
+    query_ref: table_stats
+  - metric_name: pg_table_total_size
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Total disk space used by this table, in bytes, including all indexes and TOAST data
+    values: [pg_table_total_size]
+    query_ref: table_stats
+  - metric_name: pg_table_size
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Total disk space used by this table, in bytes
+    values: [pg_table_size]
+    query_ref: table_stats
+  - metric_name: pg_table_toast_size
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Total disk space used by this table, in bytes, TOAST data only
+    values: [pg_table_toast_size]
+    query_ref: table_stats
+  - metric_name: pg_table_reltuples
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Estimated number of live rows
+    values: [pg_table_reltuples]
+    query_ref: table_stats
+  - metric_name: pg_table_tx_freeze_age
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: The oldest frozen transaction age
+    values: [pg_table_tx_freeze_age]
+    query_ref: table_stats
+  - metric_name: pg_table_io_heap_blks_read
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of disk blocks read
+    values: [pg_table_io_heap_blks_read]
+    query_ref: table_stats
+  - metric_name: pg_table_io_heap_blks_hit
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of buffer hits
+    values: [pg_table_io_heap_blks_hit]
+    query_ref: table_stats
+  - metric_name: pg_table_io_idx_blks_read
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of disk blocks read from all indexes
+    values: [pg_table_io_idx_blks_read]
+    query_ref: table_stats
+  - metric_name: pg_table_io_idx_blks_hit
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of buffer hits in all indexes
+    values: [pg_table_io_idx_blks_hit]
+    query_ref: table_stats
+  - metric_name: pg_table_io_toast_blks_read
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of disk blocks read from table TOAST table (if any)
+    values: [pg_table_io_toast_blks_read]
+    query_ref: table_stats
+  - metric_name: pg_table_io_toast_blks_hit
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of buffer hits in table TOAST table (if any)
+    values: [pg_table_io_toast_blks_hit]
+    query_ref: table_stats
+  - metric_name: pg_table_io_tidx_blks_read
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of disk blocks read from table TOAST table index (if any)
+    values: [pg_table_io_tidx_blks_read]
+    query_ref: table_stats
+  - metric_name: pg_table_io_tidx_blks_hit
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: counter
+    help: Number of buffer hits in table TOAST table index (if any)
+    values: [pg_table_io_tidx_blks_hit]
+    query_ref: table_stats
+  - metric_name: pg_table_is_partitioned
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Is table partitioned
+    values: [pg_table_is_partitioned]
+    query_ref: table_stats
+  - metric_name: pg_table_no_autovacuum
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Autovacuum is disabled for this table
+    values: [pg_table_no_autovacuum]
+    query_ref: table_stats
+  - metric_name: pg_table_fillfactor
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Fillfactor for this table
+    values: [pg_table_fillfactor]
+    query_ref: table_stats
+  - metric_name: pg_table_bloat_size
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Bloat size
+    values: [pg_table_bloat_size]
+    query_ref: table_stats
+  - metric_name: pg_table_extra_size
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - parent_relname
+      - query_search
+    type: gauge
+    help: Extra size (because of fillfactor)
+    values: [pg_table_extra_size]
+    query_ref: table_stats
+
+queries:
+  - query_name: idx_stats
+    query: |
+      with q_locked_rels as (
+          select relation from pg_locks where mode = 'AccessExclusiveLock'
+      ), est_table_size_limit as (
+          select
+              ut.relid
+              , c.relname
+              , ut.schemaname
+          from pg_stat_user_tables as ut
+              inner join pg_class c on c.oid = ut.relid
+              left join pg_class as ct on ct.oid = c.reltoastrelid
+          where not exists (select null from pg_locks where relation = ut.relid and mode = 'AccessExclusiveLock')
+            and c.relpersistence != 't'
+            and c.relkind in ('r','m', 'p')
+          order by (c.relpages::bigint + coalesce(ct.relpages, 0)::bigint) desc
+          limit 200
+          offset 0
+      ), q_index_details as (
+          select
+              sui.schemaname
+              , sui.indexrelname
+              , sui.relname as tablename
+              , sui.indexrelid
+              , sui.idx_scan
+              , sui.idx_tup_read
+              , sui.idx_tup_fetch
+              , io.idx_blks_read
+              , io.idx_blks_hit
+              , i.indisvalid
+              , i.indisprimary
+              , i.indisunique
+              , i.indisexclusion
+              , c.reltuples
+              , c.relpages
+              , c.relam
+              , c.relname as index_name
+              , ns.nspname
+          from pg_stat_user_indexes as sui
+              inner join est_table_size_limit as tl on tl.relname = sui.relname and tl.schemaname = sui.schemaname
+              inner join pg_class as c on c."oid" = sui.indexrelid
+              inner join pg_statio_user_indexes as io on io.indexrelid = sui.indexrelid
+              inner join pg_index as i on i.indexrelid = sui.indexrelid
+              inner join pg_namespace as ns on ns.oid = c.relnamespace
+          where not sui.schemaname like any (array [e'pg\\_temp%', e'\\_timescaledb%'])
+            and not exists (select null from q_locked_rels where relation = sui.relid or relation = sui.indexrelid)
+      ), btree_index_atts AS (
+          select
+              i.indrelid
+              , regexp_split_to_table(indkey::text, ' ')::smallint AS attnum
+              , qid.indexrelid
+              , qid.nspname
+              , qid.tablename
+              , qid.index_name
+              , qid.reltuples
+              , qid.relpages
+              , qid.relam
+          from q_index_details as qid
+               inner join pg_index as i on i.indexrelid = qid.indexrelid
+               inner join pg_am as pga on pga.oid = qid.relam
+          where pga.amname = 'btree' and qid.relpages > 0
+      ), index_item_sizes AS (
+          select
+              bia.indexrelid
+              , bia.reltuples
+              , bia.relpages
+              , bia.relam
+              , bia.indrelid as table_oid
+              , current_setting('block_size')::numeric as bs
+              , 8 as maxalign
+              , 24 as pagehdr
+              , case when max(coalesce(s.null_frac,0)) = 0 then 2 else 6 end as index_tuple_hdr
+              , sum( (1-coalesce(s.null_frac, 0)) * coalesce(s.avg_width, 1024) ) as nulldatawidth
+          from btree_index_atts as bia
+              inner join pg_attribute as att on att.attrelid = bia.indrelid
+                                            and att.attnum = bia.attnum
+              left join pg_stats as s on s.schemaname = bia.nspname
+              -- stats for regular index columns
+                                     and ((s.tablename = bia.tablename and s.attname = att.attname) -- pg_catalog.pg_get_indexdef(att.attrelid, att.attnum, true))
+                  -- stats for functional indexes
+                                       or (s.tablename = bia.index_name and s.attname = att.attname))
+          where att.attnum > 0
+          group by 1, 2, 3, 4, 5, 6, 7, 8
+      ), index_aligned_est AS (
+          select
+              iis.indexrelid
+              , maxalign
+              , bs
+              , reltuples
+              , relpages
+              , relam
+              , table_oid
+              , coalesce(ceil(reltuples * (6 + maxalign -
+                  case when index_tuple_hdr % maxalign = 0
+                       then maxalign
+                       else index_tuple_hdr % maxalign
+                  end + nulldatawidth + maxalign -
+                  /* add padding to the data to align on maxalign */
+                  case when nulldatawidth::integer % maxalign = 0
+                       then maxalign
+                       else nulldatawidth::integer % maxalign
+                  end)::numeric / (bs - pagehdr::numeric) + 1), 0) as expected
+               from index_item_sizes as iis
+      ), bloat as (
+          select
+              iae.indexrelid
+              , case when iae.relpages <= expected
+                     then 0
+                     else bs * (iae.relpages - expected)::bigint
+                end as wastedbytes
+          from index_aligned_est as iae
+      )
+      select
+          current_database()::varchar as datname
+          , schemaname::text as schemaname
+          , indexrelname::text as indexrelname
+          , tablename::text as relname
+          , regexp_replace(pg_get_indexdef(qid.indexrelid),indexrelname,'x') as indexdef
+          , coalesce(idx_scan, 0) as pg_idx_scan
+          , coalesce(idx_tup_read, 0) as pg_idx_tup_read
+          , coalesce(idx_tup_fetch, 0) as pg_idx_tup_fetch
+          , coalesce(idx_blks_read, 0) as pg_idx_blks_read
+          , coalesce(idx_blks_hit, 0) as pg_idx_blks_hit
+          , coalesce(pg_relation_size(qid.indexrelid), 0) as pg_idx_size
+          , case when not indisvalid then 1 else 0 end as pg_idx_is_invalid_int
+          , case when indisprimary then 1 else 0 end as pg_idx_is_pk_int
+          , case when indisunique or indisexclusion then 1 else 0 end as pg_idx_is_uq_or_exc
+          , fb.wastedbytes as pg_idx_wastedbytes
+      from q_index_details as qid
+          left join bloat as fb on fb.indexrelid = qid.indexrelid
+  - query_name: table_stats
+    query: |
+      with params as (
+          select
+              current_setting('block_size')::numeric as block_size
+      ), est_table_size_limit as (
+          select
+              ut.relid
+              , c.relname
+              , c.relnamespace
+              , c.relpages
+              , c.reltuples
+              , c.reloptions
+              , coalesce(ct.relpages, 0) as toast_pages
+              , coalesce(ct.reltuples, 0) as toast_tuples
+              , coalesce((select ro.option_value from pg_options_to_table(c.reloptions) as ro where ro.option_name = 'fillfactor')::integer, 100) as fillfactor
+              , block_size
+          from pg_stat_user_tables as ut
+              inner join pg_class c on c.oid = ut.relid
+              left join pg_class as ct on ct.oid = c.reltoastrelid
+              inner join params as p on true
+          where not exists (select null from pg_locks where relation = ut.relid and mode = 'AccessExclusiveLock')
+            and c.relpersistence != 't'
+            and c.relkind in ('r','m', 'p')
+          order by (c.relpages::bigint + coalesce(ct.relpages, 0)::bigint) * p.block_size desc
+          limit 200
+          offset 0
+      ), bloating_pre as (
+          select
+              lim.relid
+              , lim.reltuples
+              , lim.relpages + lim.toast_pages as total_pages
+              , lim.toast_tuples
+              , lim.fillfactor
+              , case when version()~'mingw32' or version()~'64-bit|x86_64|ppc64|ia64|amd64' then 8 else 4 end as ma
+              , 24 as page_hdr
+              , lim.block_size
+              , 23 + case when max(coalesce(s.null_frac,0)) > 0 then ( 7 + count(s.attname) ) / 8 else 0::int end
+                  + case when bool_or(att.attname = 'oid' and att.attnum < 0) then 4 else 0 end as tpl_hdr_size
+              , sum( (1 - coalesce(s.null_frac, 0)) * coalesce(s.avg_width, 0) ) as tpl_data_size
+              , bool_or(att.atttypid = 'pg_catalog.name'::regtype)
+                  or sum(case when att.attnum > 0 then 1 else 0 end) <> count(s.attname) as is_na
+          from est_table_size_limit as lim
+              inner join pg_attribute as att on att.attrelid = lim.relid
+              join pg_namespace as ns on ns.oid = lim.relnamespace
+              left join pg_stats as s on s.schemaname=ns.nspname
+                                     and s.tablename = lim.relname
+                                     and s.inherited = false
+                                     and s.attname = att.attname
+          where not att.attisdropped
+          group by 1,2,3,4,5,6,7,8
+          order by 2,3
+      ), bloating as (
+          select
+              bp.relid
+              , bp.block_size * bp.total_pages as real_size
+              , (bp.total_pages - est_pages.value) * bp.block_size AS extra_size
+              , case when bp.total_pages - est_pages.value_ff > 0
+                     then (bp.total_pages - est_pages.value_ff) * bp.block_size
+                     else 0
+                end as bloat_size
+              , is_na
+          from bloating_pre as bp
+              left join lateral (
+                  select ( 4 + bp.tpl_hdr_size + bp.tpl_data_size + (2 * bp.ma)
+                          - case when bp.tpl_hdr_size % bp.ma = 0 then bp.ma else bp.tpl_hdr_size % bp.ma end
+                          - case when ceil(bp.tpl_data_size)::int % bp.ma = 0 then bp.ma else ceil(bp.tpl_data_size)::int % bp.ma end
+              ) as v) as tpl_size on true
+              left join lateral (
+                  select
+                      ceil( bp.reltuples / ( (bp.block_size - bp.page_hdr)/tpl_size.v ) ) + ceil( bp.toast_tuples / 4 ) as value
+                     , ceil( bp.reltuples / ( (bp.block_size - bp.page_hdr) * bp.fillfactor/(tpl_size.v * 100) ) ) + ceil( bp.toast_tuples / 4 ) as value_ff
+              ) as est_pages on true
+      )
+      select
+          current_database() as datname
+          , ut.schemaname as schemaname
+          , ut.relname as relname
+          , coalesce(ci.relname, 'null') as parent_relname
+          , coalesce(ci.relname, c.relname) as query_search
+          , ut.seq_scan as pg_table_seq_scan
+          , ut.seq_tup_read as pg_table_seq_tup_read
+          , ut.idx_scan as pg_table_idx_scan
+          , ut.idx_tup_fetch as pg_table_idx_tup_fetch
+          , ut.n_tup_ins as pg_table_n_tup_ins
+          , ut.n_tup_upd as pg_table_n_tup_upd
+          , ut.n_tup_del as pg_table_n_tup_del
+          , ut.n_tup_hot_upd as pg_table_n_tup_hot_upd
+          , ut.n_live_tup as pg_table_n_live_tup
+          , ut.n_dead_tup as pg_table_n_dead_tup
+          , ut.n_mod_since_analyze as pg_table_n_mod_since_analyze
+          , (extract(epoch from now() - greatest(ut.last_vacuum, ut.last_autovacuum)))::int8 as pg_table_seconds_since_last_vacuum
+          , (extract(epoch from now() - greatest(ut.last_analyze, ut.last_autoanalyze)))::int8 as pg_table_seconds_since_last_analyze
+          , ut.vacuum_count as pg_table_vacuum_count
+          , ut.autovacuum_count as pg_table_autovacuum_count
+          , ut.analyze_count as pg_table_analyze_count
+          , ut.autoanalyze_count as pg_table_autoanalyze_count
+          , pg_total_relation_size(ut.relid) as pg_table_total_size
+          , pg_table_size(ut.relid) as pg_table_size
+          , case when c.reltoastrelid != 0 then pg_total_relation_size(c.reltoastrelid) else 0::int8 end as pg_table_toast_size
+          , c.reltuples as pg_table_reltuples
+          , case when c.relfrozenxid = 0 then 0 else age(c.relfrozenxid) end as pg_table_tx_freeze_age
+          , utio.heap_blks_read as pg_table_io_heap_blks_read
+          , utio.heap_blks_hit as pg_table_io_heap_blks_hit
+          , utio.idx_blks_read as pg_table_io_idx_blks_read
+          , utio.idx_blks_hit as pg_table_io_idx_blks_hit
+          , utio.toast_blks_read as pg_table_io_toast_blks_read
+          , utio.toast_blks_hit as pg_table_io_toast_blks_hit
+          , utio.tidx_blks_read as pg_table_io_tidx_blks_read
+          , utio.tidx_blks_hit as pg_table_io_tidx_blks_hit
+          , case when c.relkind = 'p' then 1 else 0 end as pg_table_is_partitioned
+          , case when 'autovacuum_enabled=off' = any (c.reloptions) then 1 else 0 end as pg_table_no_autovacuum
+          , lim.fillfactor as pg_table_fillfactor
+          , b.bloat_size as pg_table_bloat_size
+          , b.extra_size as pg_table_extra_size
+      from est_table_size_limit as lim
+          inner join pg_stat_user_tables as ut on ut.relid = lim.relid
+          inner join pg_class c on c.oid = ut.relid
+          left join pg_statio_user_tables as utio on utio.relid = ut.relid
+          left join pg_inherits as i on i.inhrelid = ut.relid
+          left join pg_class as ci on ci.oid = i.inhparent
+          left join bloating as b on b.relid = ut.relid
