@@ -1,3 +1,4 @@
+collector_name: instance_1m
 min_interval: 1m
 
 metrics:
