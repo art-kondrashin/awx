@@ -107,9 +107,9 @@
 
     - name: Check if host is master PostgreSQL node
       become: true
-      become_user: postgres
+      become_user: root
       shell: |
-        "{{ postgres_psql_path }}" -d "{{ postgres_conn_string }}" -c "SELECT pg_is_in_recovery();" -tA
+        sudo -u postgres "{{ postgres_psql_path }}" -d "{{ postgres_conn_string }}" -c "SELECT pg_is_in_recovery();" -tA
       register: pg_is_in_recovery
       failed_when: false
       changed_when: false
@@ -120,9 +120,9 @@
 
     - name: Ensure sql_exporter role exists on master
       become: true
-      become_user: postgres
+      become_user: root
       shell: |
-        {{ postgres_psql_path }} -d "{{ postgres_conn_string }}" -c "
+        sudo -u postgres {{ postgres_psql_path }} -d "{{ postgres_conn_string }}" -c "
         DO $$
         BEGIN
           IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{{ sql_exporter_db_user }}') THEN
