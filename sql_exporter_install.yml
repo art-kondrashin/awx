@@ -16,7 +16,6 @@
     postgres_conn_string: "dbname=postgres host=127.0.0.1 password=sdmnodepwd765! user=postgres target_session_attrs=read-write"
     sql_exporter_db_user: "sql_exporter"
     sql_exporter_db_password: "metrics123!"
-    sql_exporter_postgres_dsn: "postgresql://sql_exporter:metrics123!@localhost:5432/postgres?sslmode=disable"
 
   tasks:
     - name: Remove existing sql_exporter install if clean requested
