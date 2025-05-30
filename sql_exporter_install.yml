@@ -1,0 +1,148 @@
+---
+- name: Install sql_exporter with DB user setup and config templates
+  hosts: all
+  become: true
+
+  vars:
+    sql_exporter_version: "0.5"
+    sql_exporter_user: "sql_exporter"
+    sql_exporter_bin_dir: "/opt/sql_exporter"
+    sql_exporter_config_dir: "/etc/sql_exporter"
+    sql_exporter_port: 9399
+    sql_exporter_url: "https://github.com/free/sql_exporter/releases/download/v{{ sql_exporter_version }}/sql_exporter-{{ sql_exporter_version }}.linux-amd64.tar.gz"
+    sql_exporter_tmp_path: "/tmp/sql_exporter.tar.gz"
+
+    postgres_psql_path: "/opt/pgpro/sdm-17/bin/psql"
+    postgres_conn_string: "dbname=postgres host=127.0.0.1 password=sdmnodepwd765! user=postgres target_session_attrs=read-write"
+    sql_exporter_db_user: "sql_exporter"
+    sql_exporter_db_password: "metrics123!"
+    sql_exporter_postgres_dsn: "postgresql://sql_exporter:metrics123!@localhost:5432/postgres?sslmode=disable"
+
+  tasks:
+    - name: Remove existing sql_exporter install if clean requested
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ sql_exporter_bin_dir }}"
+        - "{{ sql_exporter_config_dir }}"
+      when: clean_before_install | default(false)
+
+    - name: Create sql_exporter user (Linux)
+      user:
+        name: "{{ sql_exporter_user }}"
+        shell: /usr/sbin/nologin
+        system: yes
+        create_home: no
+
+    - name: Create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ sql_exporter_user }}"
+        group: "{{ sql_exporter_user }}"
+        mode: "0755"
+      loop:
+        - "{{ sql_exporter_bin_dir }}"
+        - "{{ sql_exporter_config_dir }}"
+
+    - name: Download sql_exporter
+      get_url:
+        url: "{{ sql_exporter_url }}"
+        dest: "{{ sql_exporter_tmp_path }}"
+        mode: "0644"
+        force: true
+      notify: Restart sql_exporter
+
+    - name: Unpack sql_exporter
+      unarchive:
+        src: "{{ sql_exporter_tmp_path }}"
+        dest: "{{ sql_exporter_bin_dir }}"
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+      notify: Restart sql_exporter
+
+    - name: Deploy config.yml
+      template:
+        src: "templates/config.yml.j2"
+        dest: "{{ sql_exporter_config_dir }}/config.yml"
+        owner: "{{ sql_exporter_user }}"
+        group: "{{ sql_exporter_user }}"
+        mode: "0644"
+      notify: Restart sql_exporter
+
+    - name: Copy collector configs
+      copy:
+        src: "templates/{{ item }}"
+        dest: "{{ sql_exporter_config_dir }}/{{ item }}"
+        owner: "{{ sql_exporter_user }}"
+        group: "{{ sql_exporter_user }}"
+        mode: "0644"
+      loop:
+        - database1h.collector.yml
+        - instance10s.collector.yml
+        - instance1h.collector.yml
+        - instance1m.collector.yml
+      notify: Restart sql_exporter
+
+    - name: Install systemd unit
+      copy:
+        content: |
+          [Unit]
+          Description=SQL Exporter
+          After=network.target
+
+          [Service]
+          User={{ sql_exporter_user }}
+          ExecStart={{ sql_exporter_bin_dir }}/sql_exporter --config.file={{ sql_exporter_config_dir }}/config.yml
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/sql_exporter.service
+        mode: "0644"
+      notify:
+        - Reload systemd
+        - Restart sql_exporter
+
+    - name: Check if host is master PostgreSQL node
+      become: true
+      become_user: postgres
+      shell: |
+        "{{ postgres_psql_path }}" -d "{{ postgres_conn_string }}" -c "SELECT pg_is_in_recovery();" -tA
+      register: pg_is_in_recovery
+      failed_when: false
+      changed_when: false
+
+    - name: Set fact is_master
+      set_fact:
+        is_master: "{{ pg_is_in_recovery.stdout.strip() == 'f' }}"
+
+    - name: Ensure sql_exporter role exists on master
+      become: true
+      become_user: postgres
+      shell: |
+        {{ postgres_psql_path }} -d "{{ postgres_conn_string }}" -c "
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{{ sql_exporter_db_user }}') THEN
+            CREATE ROLE {{ sql_exporter_db_user }} LOGIN PASSWORD '{{ sql_exporter_db_password }}';
+            GRANT CONNECT ON DATABASE postgres TO {{ sql_exporter_db_user }};
+            GRANT USAGE ON SCHEMA public TO {{ sql_exporter_db_user }};
+            GRANT SELECT ON ALL TABLES IN SCHEMA public TO {{ sql_exporter_db_user }};
+            ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO {{ sql_exporter_db_user }};
+          END IF;
+        END
+        $$;"
+      when: is_master
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: true
+
+    - name: Restart sql_exporter
+      systemd:
+        name: sql_exporter
+        state: restarted
+        enabled: true
