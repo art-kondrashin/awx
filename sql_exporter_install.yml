@@ -122,7 +122,7 @@
       become_user: root
       shell: |
         sudo -u postgres {{ postgres_psql_path }} -d "{{ postgres_conn_string }}" -c "
-        DO $$
+        DO \$\$
         BEGIN
           IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{{ sql_exporter_db_user }}') THEN
             CREATE ROLE {{ sql_exporter_db_user }} LOGIN PASSWORD '{{ sql_exporter_db_password }}';
@@ -132,7 +132,7 @@
             ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO {{ sql_exporter_db_user }};
           END IF;
         END
-        $$;"
+        \$\$;"
       when: is_master
 
   handlers:
