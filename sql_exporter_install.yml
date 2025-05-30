@@ -9,7 +9,7 @@
     sql_exporter_bin_dir: "/opt/sql_exporter"
     sql_exporter_config_dir: "/etc/sql_exporter"
     sql_exporter_port: 9399
-    sql_exporter_url: "https://github.com/free/sql_exporter/releases/download/v{{ sql_exporter_version }}/sql_exporter-{{ sql_exporter_version }}.linux-amd64.tar.gz"
+    sql_exporter_url: "https://github.com/free/sql_exporter/releases/download/{{ sql_exporter_version }}/sql_exporter-{{ sql_exporter_version }}.linux-amd64.tar.gz"
     sql_exporter_tmp_path: "/tmp/sql_exporter.tar.gz"
 
     postgres_psql_path: "/opt/pgpro/sdm-17/bin/psql"
