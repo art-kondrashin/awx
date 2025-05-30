@@ -1,0 +1,1322 @@
+collector_name: instance_10s
+# Similar to global.min_interval, but applies to the queries defined by this collector only.
+min_interval: 10s
+
+metrics:
+  - metric_name: pg_database_session_time
+    key_labels:
+      - datname
+    type: counter
+    help: Time spent by database sessions in this database, in milliseconds (note that statistics are only updated when the state of a session changes, so if sessions have been idle for a long time, this idle time wont be included)
+    values: [pg_database_session_time]
+    query_ref: database_stats
+  - metric_name: pg_database_active_time
+    key_labels:
+      - datname
+    type: counter
+    help: Time spent executing SQL statements in this database, in milliseconds (this corresponds to the states active and fastpath function call in pg_stat_activity)
+    values: [pg_database_active_time]
+    query_ref: database_stats
+  - metric_name: pg_database_idle_in_transaction_time
+    key_labels:
+      - datname
+    type: counter
+    help: Time spent idling while in a transaction in this database, in milliseconds (this corresponds to the states idle in transaction and idle in transaction (aborted) in pg_stat_activity)
+    values: [pg_database_idle_in_transaction_time]
+    query_ref: database_stats
+  - metric_name: pg_database_sessions
+    key_labels:
+      - datname
+    type: counter
+    help: Total number of sessions established to this database
+    values: [pg_database_sessions]
+    query_ref: database_stats
+  - metric_name: pg_database_sessions_abandoned
+    key_labels:
+      - datname
+    type: counter
+    help: Number of database sessions to this database that were terminated because connection to the client was lost
+    values: [pg_database_sessions_abandoned]
+    query_ref: database_stats
+  - metric_name: pg_database_sessions_fatal
+    key_labels:
+      - datname
+    type: counter
+    help: Number of database sessions to this database that were terminated by fatal errors
+    values: [pg_database_sessions_fatal]
+    query_ref: database_stats
+  - metric_name: pg_database_sessions_killed
+    key_labels:
+      - datname
+    type: counter
+    help: Number of database sessions to this database that were terminated by operator intervention
+    values: [pg_database_sessions_killed]
+    query_ref: database_stats
+  - metric_name: pg_bgwriter_checkpoints_timed
+    type: counter
+    help: Number of scheduled checkpoints that have been performed
+    values: [pg_bgwriter_checkpoints_timed]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_checkpoints_req
+    type: counter
+    help: Number of requested checkpoints that have been performed
+    values: [pg_bgwriter_checkpoints_req]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_checkpoint_write_time
+    type: counter
+    help: Total amount of time that has been spent in the portion of checkpoint processing where files are written to disk, in milliseconds
+    values: [pg_bgwriter_checkpoint_write_time]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_checkpoint_sync_time
+    type: counter
+    help: Total amount of time that has been spent in the portion of checkpoint processing where files are synchronized to disk, in milliseconds
+    values: [pg_bgwriter_checkpoint_sync_time]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_buffers_checkpoint
+    type: counter
+    help: Number of buffers written during checkpoints
+    values: [pg_bgwriter_buffers_checkpoint]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_buffers_clean
+    type: counter
+    help: Number of buffers written by the background writer
+    values: [pg_bgwriter_buffers_clean]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_maxwritten_clean
+    type: counter
+    help: Number of times the background writer stopped a cleaning scan because it had written too many buffers
+    values: [pg_bgwriter_maxwritten_clean]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_buffers_backend
+    type: counter
+    help: Number of buffers written directly by a backend
+    values: [pg_bgwriter_buffers_backend]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_buffers_backend_fsync
+    type: counter
+    help: Number of times a backend had to execute its own fsync call (normally the background writer handles those even when the backend does its own write)
+    values: [pg_bgwriter_buffers_backend_fsync]
+    query_ref: bgwriter_stats
+  - metric_name: pg_bgwriter_buffers_alloc
+    type: counter
+    help: Number of buffers allocated
+    values: [pg_bgwriter_buffers_alloc]
+    query_ref: bgwriter_stats
+  - metric_name: pg_wal_records
+    type: counter
+    help: Total number of WAL records generated
+    values: [pg_wal_records]
+    query_ref: wal_stats
+  - metric_name: pg_wal_fpi
+    type: counter
+    help: Total number of WAL full page images generated
+    values: [pg_wal_fpi]
+    query_ref: wal_stats
+  - metric_name: pg_wal_bytes
+    type: counter
+    help: Total amount of WAL generated in bytes
+    values: [pg_wal_bytes]
+    query_ref: wal_stats
+  - metric_name: pg_wal_buffers_full
+    type: counter
+    help: Number of times WAL data was written to disk because WAL buffers became full
+    values: [pg_wal_buffers_full]
+    query_ref: wal_stats
+  - metric_name: pg_wal_write
+    type: counter
+    help: Number of times WAL buffers were written out to disk via XLogWrite request
+    values: [pg_wal_write]
+    query_ref: wal_stats
+  - metric_name: pg_wal_sync
+    type: counter
+    help: Number of times WAL files were synced to disk via issue_xlog_fsync request (if fsync is on and wal_sync_method is either fdatasync, fsync or fsync_writethrough, otherwise zero)
+    values: [pg_wal_sync]
+    query_ref: wal_stats
+  - metric_name: pg_wal_write_time
+    type: counter
+    help: Total amount of time spent writing WAL buffers to disk via XLogWrite request, in milliseconds
+    values: [pg_wal_write_time]
+    query_ref: wal_stats
+  - metric_name: pg_wal_sync_time
+    type: counter
+    help: Total amount of time spent syncing WAL files to disk via issue_xlog_fsync request, in milliseconds
+    values: [pg_wal_sync_time]
+    query_ref: wal_stats
+  - metric_name: pg_archiver_success_cnt
+    type: counter
+    help: Number of WAL files that have been successfully archived
+    values: [pg_archiver_success_cnt]
+    query_ref: archiver_stats
+  - metric_name: pg_archiver_failed_cnt
+    type: counter
+    help: Number of failed attempts for archiving WAL files
+    values: [pg_archiver_failed_cnt]
+    query_ref: archiver_stats
+  - metric_name: pg_archiver_success_time
+    type: counter
+    help: Number of seconds passed since the most recent successful archive operation
+    values: [pg_archiver_success_time]
+    query_ref: archiver_stats
+  - metric_name: pg_archiver_failed_time
+    type: counter
+    help: Number of seconds passed since the most recent failed archival operation
+    values: [pg_archiver_failed_time]
+    query_ref: archiver_stats
+  - metric_name: pg_activity_cur_time
+    key_labels:
+      - datname
+      - usename
+      - backend_type
+      - query_kind
+      - state
+      - wait_event
+      - wait_event_type
+    type: gauge
+    help: Time of querying
+    values: [pg_activity_cur_time]
+    query_ref: activity_stats
+  - metric_name: pg_activity_states
+    key_labels:
+      - datname
+      - usename
+      - backend_type
+      - query_kind
+      - state
+      - wait_event
+      - wait_event_type
+    type: gauge
+    help: Process count
+    values: [pg_activity_states]
+    query_ref: activity_stats
+  - metric_name: pg_activity_backend_start_max
+    key_labels:
+      - datname
+      - usename
+      - backend_type
+      - query_kind
+      - state
+      - wait_event
+      - wait_event_type
+    type: gauge
+    help: Max Time when this process was started. For client backends, this is the time the client connected to the server.
+    values: [pg_activity_backend_start_max]
+    query_ref: activity_stats
+  - metric_name: pg_activity_xact_start_max
+    key_labels:
+      - datname
+      - usename
+      - backend_type
+      - query_kind
+      - state
+      - wait_event
+      - wait_event_type
+    type: gauge
+    help: Max Time when this process' current transaction was started, or null if no transaction is active. If the current query is the first of its transaction, this column is equal to the query_start column.
+    values: [pg_activity_xact_start_max]
+    query_ref: activity_stats
+  - metric_name: pg_activity_query_start_max
+    key_labels:
+      - datname
+      - usename
+      - backend_type
+      - query_kind
+      - state
+      - wait_event
+      - wait_event_type
+    type: gauge
+    help: Max Time when the currently active query was started, or if state is not active, when the last query was started
+    values: [pg_activity_query_start_max]
+    query_ref: activity_stats
+  - metric_name: pg_activity_state_change_max
+    key_labels:
+      - datname
+      - usename
+      - backend_type
+      - query_kind
+      - state
+      - wait_event
+      - wait_event_type
+    type: gauge
+    help: Max Time when the state was last changed
+    values: [pg_activity_state_change_max]
+    query_ref: activity_stats
+  - metric_name: pg_vacuum_cur_time
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - wait_event
+    type: gauge
+    help: Time of querying
+    values: [pg_vacuum_cur_time]
+    query_ref: vacuum_stats
+  - metric_name: pg_vacuum_duration
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - wait_event
+    type: gauge
+    help: Number of seconds passed since vacuum started
+    values: [pg_vacuum_duration]
+    query_ref: vacuum_stats
+  - metric_name: pg_vacuum_state_change
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - wait_event
+    type: gauge
+    help: Number of seconds passed since waiting started
+    values: [pg_vacuum_state_change]
+    query_ref: vacuum_stats
+  - metric_name: pg_vacuum_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - wait_event
+    type: gauge
+    help: Total number of heap blocks in the table
+    values: [pg_vacuum_total]
+    query_ref: vacuum_stats
+  - metric_name: pg_vacuum_scanned
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - wait_event
+    type: gauge
+    help: Number of heap blocks scanned
+    values: [pg_vacuum_scanned]
+    query_ref: vacuum_stats
+  - metric_name: pg_vacuum_vacuumed
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - wait_event
+    type: gauge
+    help: Number of heap blocks vacuumed
+    values: [pg_vacuum_vacuumed]
+    query_ref: vacuum_stats
+  - metric_name: pg_vacuum_index_vacuum_count
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - wait_event
+    type: gauge
+    help: Number of completed index vacuum cycles
+    values: [pg_vacuum_index_vacuum_count]
+    query_ref: vacuum_stats
+  - metric_name: pg_vacuum_work_mem_usage
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - wait_event
+    type: gauge
+    help: Work_mem usage percent
+    values: [pg_vacuum_work_mem_usage]
+    query_ref: vacuum_stats
+  - metric_name: pg_analyze_cur_time
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Time of querying
+    values: [pg_analyze_cur_time]
+    query_ref: analyze_stats
+  - metric_name: pg_analyze_duration
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Number of seconds passed since analyze started
+    values: [pg_analyze_duration]
+    query_ref: analyze_stats
+  - metric_name: pg_analyze_state_change
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Number of seconds passed since waiting started
+    values: [pg_analyze_state_change]
+    query_ref: analyze_stats
+  - metric_name: pg_analyze_sample_blks_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Total number of heap blocks that will be sampled
+    values: [pg_analyze_sample_blks_total]
+    query_ref: analyze_stats
+  - metric_name: pg_analyze_sample_blks_scanned
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Number of heap blocks scanned
+    values: [pg_analyze_sample_blks_scanned]
+    query_ref: analyze_stats
+  - metric_name: pg_analyze_ext_stats_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Number of extended statistics
+    values: [pg_analyze_ext_stats_total]
+    query_ref: analyze_stats
+  - metric_name: pg_analyze_ext_stats_computed
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Number of extended statistics computed. This counter only advances when the phase is computing extended statistics
+    values: [pg_analyze_ext_stats_computed]
+    query_ref: analyze_stats
+  - metric_name: pg_analyze_child_tables_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Number of child tables
+    values: [pg_analyze_child_tables_total]
+    query_ref: analyze_stats
+  - metric_name: pg_analyze_child_tables_done
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - mode
+      - phase
+      - cur_child_schemaname
+      - cur_child_relname
+      - wait_event
+    type: gauge
+    help: Number of child tables scanned. This counter only advances when the phase is acquiring inherited sample rows
+    values: [pg_analyze_child_tables_done]
+    query_ref: analyze_stats
+  - metric_name: pg_create_index_cur_time
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Time of querying
+    values: [pg_create_index_cur_time]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_duration
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of seconds passed since create index started
+    values: [pg_create_index_duration]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_lockers_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Total number of lockers to wait for, when applicable
+    values: [pg_create_index_lockers_total]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_lockers_done
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of lockers already waited for
+    values: [pg_create_index_lockers_done]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_current_locker_pid
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Process ID of the locker currently being waited for
+    values: [pg_create_index_current_locker_pid]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_phase
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Phase of creating index
+    values: [pg_create_index_phase]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_partition_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Total number of partitions on which the index is to be created
+    values: [pg_create_index_partition_total]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_partition_done
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of partitions on which the index has been created
+    values: [pg_create_index_partition_done]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_blocks_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Total number of blocks to be processed in the current phase
+    values: [pg_create_index_blocks_total]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_blocks_done
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of blocks already processed in the current phase
+    values: [pg_create_index_blocks_done]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_tuples_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Total number of tuples to be processed in the current phase
+    values: [pg_create_index_tuples_total]
+    query_ref: create_index_stats
+  - metric_name: pg_create_index_tuples_done
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of tuples already processed in the current phase
+    values: [pg_create_index_tuples_done]
+    query_ref: create_index_stats
+  - metric_name: pg_cluster_cur_time
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Time of querying
+    values: [pg_cluster_cur_time]
+    query_ref: cluster_stats
+  - metric_name: pg_cluster_duration
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of seconds passed since cluster/vacuum full started
+    values: [pg_cluster_duration]
+    query_ref: cluster_stats
+  - metric_name: pg_cluster_phase
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Phase of clustering/vacuuming full
+    values: [pg_cluster_phase]
+    query_ref: cluster_stats
+  - metric_name: pg_cluster_heap_blks_total
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Total number of heap blocks in the table
+    values: [pg_cluster_heap_blks_total]
+    query_ref: cluster_stats
+  - metric_name: pg_cluster_heap_blks_scanned
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of heap blocks scanned
+    values: [pg_cluster_heap_blks_scanned]
+    query_ref: cluster_stats
+  - metric_name: pg_cluster_heap_tuples_scanned
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of heap tuples scanned
+    values: [pg_cluster_heap_tuples_scanned]
+    query_ref: cluster_stats
+  - metric_name: pg_cluster_heap_tuples_written
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Number of heap tuples written
+    values: [pg_cluster_heap_tuples_written]
+    query_ref: cluster_stats
+  - metric_name: pg_cluster_index_rebuild_cnt
+    key_labels:
+      - datname
+      - schemaname
+      - relname
+      - command
+      - wait_event
+    type: gauge
+    help: Index rebuild count
+    values: [pg_cluster_index_rebuild_cnt]
+    query_ref: cluster_stats
+  - metric_name: pg_lock_pid
+    key_labels:
+      - datname
+      - state
+      - wait_event
+      - query
+      - queryid
+    type: gauge
+    help: Pid of locked session
+    values: [pg_lock_pid]
+    query_ref: lock_stats
+  - metric_name: pg_lock_root_pid
+    key_labels:
+      - datname
+      - state
+      - wait_event
+      - query
+      - queryid
+    type: gauge
+    help: Pid of root in locked tree
+    values: [pg_lock_root_pid]
+    query_ref: lock_stats
+  - metric_name: pg_lock_level
+    key_labels:
+      - datname
+      - state
+      - wait_event
+      - query
+      - queryid
+    type: gauge
+    help: Level in locked tree
+    values: [pg_lock_level]
+    query_ref: lock_stats
+  - metric_name: pg_lock_ts_age
+    key_labels:
+      - datname
+      - state
+      - wait_event
+      - query
+      - queryid
+    type: gauge
+    help: Number of seconds passed since transaction started
+    values: [pg_lock_ts_age]
+    query_ref: lock_stats
+  - metric_name: pg_lock_change_age
+    key_labels:
+      - datname
+      - state
+      - wait_event
+      - query
+      - queryid
+    type: gauge
+    help: Number of seconds passed since transaction locked
+    values: [pg_lock_change_age]
+    query_ref: lock_stats
+  - metric_name: pg_lock_cur_time
+    key_labels:
+      - datname
+      - state
+      - wait_event
+      - query
+      - queryid
+    type: gauge
+    help: Time of querying
+    values: [pg_lock_cur_time]
+    query_ref: lock_stats
+  - metric_name: pg_lock_blocked_cnt
+    key_labels:
+      - datname
+      - state
+      - wait_event
+      - query
+      - queryid
+    type: gauge
+    help: Number of locked childs
+    values: [pg_lock_blocked_cnt]
+    query_ref: lock_stats
+  - metric_name: pg_logical_replication_lag_bytes
+    key_labels:
+      - slot_name
+      - sync_state
+      - database
+      - application_name
+      - client_addr
+    type: gauge
+    help: Amount of logical replication lag on all instance logical slots
+    values: [logical_replication_lag_bytes]
+    query_ref: logical_replication_stats
+  - metric_name: pg_logical_replication_slot_active
+    key_labels:
+      - slot_name
+      - sync_state
+      - database
+      - application_name
+      - client_addr
+    type: gauge
+    help: Active or inactive of replication slot
+    values: [active]
+    query_ref: logical_replication_stats
+  - metric_name: pg_replication_lag_total_bytes
+    key_labels:
+      - slot_name
+      - sync_state
+    type: gauge
+    help: Amount of total physical replication lag in bytes
+    values: [total_lag]
+    query_ref: physical_replication_stats
+  - metric_name: pg_replication_lag_pending_bytes
+    key_labels:
+      - slot_name
+      - sync_state
+    type: gauge
+    help: Amount of pending physical replication lag in bytes
+    values: [pending_lag]
+    query_ref: physical_replication_stats
+  - metric_name: pg_replication_lag_write_bytes
+    key_labels:
+      - slot_name
+      - sync_state
+    type: gauge
+    help: Amount of write physical replication lag in bytes
+    values: [write_lag]
+    query_ref: physical_replication_stats
+  - metric_name: pg_replication_lag_flush_bytes
+    key_labels:
+      - slot_name
+      - sync_state
+    type: gauge
+    help: Amount of flush physical replication lag in bytes
+    values: [flush_lag]
+    query_ref: physical_replication_stats
+  - metric_name: pg_replication_lag_replay_bytes
+    key_labels:
+      - slot_name
+      - sync_state
+    type: gauge
+    help: Amount of replay physical replication lag in bytes
+    values: [replay_lag]
+    query_ref: physical_replication_stats
+  - metric_name: pg_physical_replication_slot_active
+    key_labels:
+      - slot_name
+      - sync_state
+    type: gauge
+    help: Active or inactive physical replication slot
+    values: [active]
+    query_ref: physical_replication_stats
+
+queries:
+  - query_name: database_stats
+    query: |
+      select
+          db.datname
+                    , db.session_time as pg_database_session_time
+          , db.active_time as pg_database_active_time
+          , db.idle_in_transaction_time as pg_database_idle_in_transaction_time
+          , db.sessions as pg_database_sessions
+          , db.sessions_abandoned as pg_database_sessions_abandoned
+          , db.sessions_fatal as pg_database_sessions_fatal
+          , db.sessions_killed as pg_database_sessions_killed
+                from pg_stat_database as db
+      where datname not in ('template1', 'template0', 'postgres')
+  - query_name: bgwriter_stats
+    query: |
+      with params as (
+          select
+              current_setting('block_size')::numeric as block_size
+      )
+      select
+          checkpoints_timed as pg_bgwriter_checkpoints_timed
+          , checkpoints_req as pg_bgwriter_checkpoints_req
+          , checkpoint_write_time as pg_bgwriter_checkpoint_write_time
+          , checkpoint_sync_time as pg_bgwriter_checkpoint_sync_time
+          , buffers_checkpoint * prm.block_size as pg_bgwriter_buffers_checkpoint
+          , buffers_clean * prm.block_size as pg_bgwriter_buffers_clean
+          , maxwritten_clean as pg_bgwriter_maxwritten_clean
+          , buffers_backend * prm.block_size as pg_bgwriter_buffers_backend
+          , buffers_backend_fsync as pg_bgwriter_buffers_backend_fsync
+          , buffers_alloc * prm.block_size as pg_bgwriter_buffers_alloc
+      from pg_stat_bgwriter as bgw
+        inner join params as prm on true
+  - query_name: wal_stats
+    query: |
+      with params as (
+          select
+               true  as value
+      )
+      select
+          wal_records as pg_wal_records
+          , wal_fpi as pg_wal_fpi
+          , wal_bytes as pg_wal_bytes
+          , wal_buffers_full as pg_wal_buffers_full
+          , wal_write as pg_wal_write
+          , wal_sync as pg_wal_sync
+          , wal_write_time as pg_wal_write_time
+          , wal_sync_time as pg_wal_sync_time
+                from pg_stat_wal
+                    inner join params as prm on prm.value
+  - query_name: archiver_stats
+    query: |
+      select
+          a.archived_count as pg_archiver_success_cnt
+          , a.failed_count as pg_archiver_failed_cnt
+          , extract(epoch from clock_timestamp() - a.last_archived_time)::int8 as pg_archiver_success_time
+          , extract(epoch from clock_timestamp() - a.last_failed_time)::int8 as pg_archiver_failed_time
+      from pg_stat_archiver as a
+  - query_name: activity_stats
+    query: |
+      select
+          a.datname
+          , a.usename
+                    , a.backend_type
+                    , case when left(q.query, 100) ~* E'^(\\s*(--[^\\n]*\\n|/\\*.*\\*/|\\n))*(autovacuum|VACUUM|ANALYZE|REINDEX|CLUSTER|CREATE|ALTER|TRUNCATE|DROP)'
+               then
+                   case when q.query ~ 'wraparound' then 'to prevent wraparound'
+                        when q.query ~ 'autovacuum' then 'autovacuum'
+                        when q.query ~ 'analyze' then 'analyze'
+                        when q.query ~ 'vacuum' then 'vacuum'
+                        when q.query ~ 'reindex' or q.query ~ 'create index' then 'index'
+                        when q.query ~ 'alter' then 'alter'
+                        when q.query ~ 'create' then 'create'
+                        when q.query ~ 'truncate' then 'truncate'
+                        when q.query ~ 'drop' then 'drop'
+                        else 'maintenance'
+                   end
+               else case when extract(epoch from clock_timestamp() - a.query_start) > 60 then left(a.query, 50) || '...' || right(a.query, 50) else 'query' end end as query_kind
+          , a.state
+          , a.wait_event
+          , a.wait_event_type
+          , count(*) as pg_activity_states
+          , extract(epoch from clock_timestamp()) as pg_activity_cur_time
+          , max(extract(epoch from clock_timestamp() - a.backend_start)) as pg_activity_backend_start_max
+          , max(extract(epoch from clock_timestamp() - a.xact_start)) as pg_activity_xact_start_max
+          , max(extract(epoch from clock_timestamp() - a.query_start)) as pg_activity_query_start_max
+          , max(extract(epoch from clock_timestamp() - a.state_change)) as pg_activity_state_change_max
+      from pg_stat_activity as a
+          left join lateral (select lower(a.query) as query) as q on true
+      group by
+          a.datname
+          , a.usename
+          , a.backend_type          , query_kind
+          , a.state
+          , a.wait_event
+          , a.wait_event_type
+  - query_name: vacuum_stats
+    query: |
+      with params as (
+          select
+              current_setting('block_size')::int as block_size
+      )
+      select
+          p.datname
+          , case when c.relkind = 't' then split_part(substr(c.relname, 10)::int8::regclass::text, '.', 1) else ns.nspname end as schemaname
+          , case when c.relkind = 't' then format('%s(%s)', split_part(substr(c.relname, 10)::int8::regclass::text, '.', 2), c.relname) else c.relname end as relname
+          , case when a.query ~ '^autovacuum.*to prevent wraparound' then 'wraparound'
+                 when a.query ~ '^vacuum' then 'user'
+                 else 'regular'
+            end as mode
+          , p.phase
+          , wait_event_type ||'.'|| wait_event as wait_event
+          , extract(epoch from clock_timestamp()) as pg_vacuum_cur_time
+          , extract(epoch from clock_timestamp() - a.xact_start)::int8 as pg_vacuum_duration
+          , extract(epoch from clock_timestamp() - a.state_change)::int8 as pg_vacuum_state_change
+          , p.heap_blks_total * prm.block_size as pg_vacuum_total
+          , p.heap_blks_scanned * prm.block_size as pg_vacuum_scanned
+          , p.heap_blks_vacuumed * prm.block_size as pg_vacuum_vacuumed
+          , p.index_vacuum_count as pg_vacuum_index_vacuum_count
+          , round(100.0 *  p.num_dead_tuples  /  p.max_dead_tuples , 1) as pg_vacuum_work_mem_usage
+      from pg_stat_progress_vacuum as p
+          left join pg_class as c on c.oid = p.relid
+          left join pg_namespace as ns on ns.oid = c.relnamespace
+          left join pg_stat_activity as a on a.pid = p.pid
+          left join params as prm on true
+  - query_name: analyze_stats
+    query: |
+      with params as (
+          select
+              current_setting('block_size')::int as block_size
+      )
+      select
+                    pa.datname
+          , ns.nspname as schemaname
+          , c.relname as relname
+          , case when a.query ~ '^analyze' then 'user'
+                 else 'regular'
+            end as mode
+          , pa.phase
+          , nsc.nspname as cur_child_schemaname
+          , cc.relname as cur_child_relname
+          , wait_event_type ||'.'|| wait_event as wait_event
+          , extract(epoch from clock_timestamp()) as pg_analyze_cur_time
+          , extract(epoch from clock_timestamp() - a.xact_start)::int8 as pg_analyze_duration
+          , extract(epoch from clock_timestamp() - a.state_change)::int8 as pg_analyze_state_change
+          , pa.sample_blks_total * prm.block_size as pg_analyze_sample_blks_total
+          , pa.sample_blks_scanned * prm.block_size as pg_analyze_sample_blks_scanned
+          , case when pa.ext_stats_total = 0 then 1 else pa.ext_stats_total end as pg_analyze_ext_stats_total
+          , case when pa.ext_stats_total = 0 then 1 else pa.ext_stats_computed end as pg_analyze_ext_stats_computed
+          , case when pa.child_tables_total = 0 then 1 else pa.child_tables_total end as pg_analyze_child_tables_total
+          , case when pa.child_tables_total = 0 then 1 else pa.child_tables_done end as pg_analyze_child_tables_done
+      from pg_stat_progress_analyze as pa
+          left join pg_class as c on c.oid = pa.relid
+          left join pg_namespace as ns on ns.oid = c.relnamespace
+          left join pg_stat_activity as a on a.pid = pa.pid
+          left join pg_class as cc on cc.oid = pa.current_child_table_relid
+          left join pg_namespace as nsc on nsc.oid = cc.relnamespace
+                    left join params as prm on  true
+  - query_name: create_index_stats
+    query: |
+      with params as (
+          select
+               true  as value
+              , current_setting('block_size')::int as block_size
+      )
+      select
+                    i.datname
+          , ns.nspname as schemaname
+          , c.relname as relname
+          , i.command
+          , a.wait_event_type ||'.'|| a.wait_event as wait_event
+          , extract(epoch from clock_timestamp()) as pg_create_index_cur_time
+          , extract(epoch from clock_timestamp() - a.xact_start)::int8 as pg_create_index_duration
+          , i.lockers_total as pg_create_index_lockers_total
+          , i.lockers_done as pg_create_index_lockers_done
+          , i.current_locker_pid as pg_create_index_current_locker_pid
+          , pp.value as pg_create_index_phase
+          , i.partitions_total as pg_create_index_partition_total
+          , i.partitions_done as pg_create_index_partition_done
+          , i.blocks_total * prm.block_size as pg_create_index_blocks_total
+          , i.blocks_done * prm.block_size as pg_create_index_blocks_done
+          , i.tuples_total as pg_create_index_tuples_total
+          , i.tuples_done as pg_create_index_tuples_done
+      from pg_stat_progress_create_index as i
+          left join pg_class as c on c.oid = i.relid
+          left join pg_namespace as ns on ns.oid = c.relnamespace
+          left join pg_stat_activity as a on a.pid = i.pid
+          left join lateral (
+              select
+                  case i.phase
+                      when 'initializing' then 1
+                      when 'waiting for writers before build' then 2
+                      when 'building index: scanning table' then 3
+                      when 'building index: sorting live tuples' then 4
+                      when 'building index: loading tuples in tree' then 5
+                      when 'waiting for writers before validation' then 6
+                      when 'index validation: scanning index' then 7
+                      when 'index validation: sorting tuples' then 8
+                      when 'index validation: scanning table' then 9
+                      when 'waiting for old snapshots' then 10
+                      when 'waiting for readers before marking dead' then 11
+                      when 'waiting for readers before dropping' then 12
+                      else 0
+                  end as value
+          ) as pp on true
+                    inner join params as prm on prm.value
+  - query_name: cluster_stats
+    query: |
+      with params as (
+          select
+               true  as value
+              , current_setting('block_size')::int as block_size
+      )
+      select
+                    p.datname
+          , ns.nspname as schemaname
+          , c.relname as relname
+          , p.command
+          , a.wait_event_type ||'.'|| a.wait_event as wait_event
+          , extract(epoch from clock_timestamp()) as pg_cluster_cur_time
+          , extract(epoch from clock_timestamp() - a.xact_start)::int8 as pg_cluster_duration
+          , pp.value as pg_cluster_phase
+          , p.heap_blks_total * prm.block_size as pg_cluster_heap_blks_total
+          , p.heap_blks_scanned * prm.block_size as pg_cluster_heap_blks_scanned
+          , p.heap_tuples_scanned as pg_cluster_heap_tuples_scanned
+          , p.heap_tuples_written as pg_cluster_heap_tuples_written
+          , p.index_rebuild_count as pg_cluster_index_rebuild_cnt
+      from pg_stat_progress_cluster as p
+          left join pg_class as c on c.oid = p.relid
+          left join pg_namespace as ns on ns.oid = c.relnamespace
+          left join pg_stat_activity as a on a.pid = p.pid
+          left join lateral (
+              select
+                  case p.phase
+                      when 'initializing' then 1
+                      when 'seq scanning heap' then 2
+                      when 'index scanning heap' then 3
+                      when 'sorting tuples' then 4
+                      when 'writing new heap' then 5
+                      when 'swapping relation files' then 6
+                      when 'rebuilding index' then 7
+                      when 'performing final cleanup' then 8
+                      else 0
+                  end as value
+          ) as pp on true
+                    inner join params as prm on prm.value
+  - query_name: lock_stats
+    query: |
+      with conflicts(lock, conflict) as (values
+          ('AccessShare', 'AccessExclusive'), ('RowShare', 'Exclusive'),
+          ('RowShare', 'AccessExclusive'), ('RowExclusive', 'Share'),
+          ('RowExclusive', 'ShareRowExclusive'), ('RowExclusive', 'Exclusive'),
+          ('RowExclusive', 'AccessExclusive'), ('ShareUpdateExclusive', 'ShareUpdateExclusive'),
+          ('ShareUpdateExclusive', 'Share'), ('ShareUpdateExclusive', 'ShareRowExclusive'),
+          ('ShareUpdateExclusive', 'Exclusive'), ('ShareUpdateExclusive', 'AccessExclusive'),
+          ('Share', 'RowExclusive'), ('Share', 'ShareUpdateExclusive'),
+          ('Share', 'ShareRowExclusive'), ('Share', 'Exclusive'),
+          ('Share', 'AccessExclusive'), ('ShareRowExclusive','RowExclusive'),
+          ('ShareRowExclusive', 'ShareUpdateExclusive'), ('ShareRowExclusive', 'Share'),
+          ('ShareRowExclusive', 'ShareRowExclusive'), ('ShareRowExclusive', 'Exclusive'),
+          ('ShareRowExclusive', 'AccessExclusive'), ('Exclusive', 'RowShare'),
+          ('Exclusive', 'RowExclusive'), ('Exclusive', 'ShareUpdateExclusive'),
+          ('Exclusive', 'Share'), ('Exclusive', 'ShareRowExclusive'),
+          ('Exclusive', 'Exclusive'), ('Exclusive', 'AccessExclusive'),
+          ('AccessExclusive', 'AccessShare'), ('AccessExclusive', 'RowShare'),
+          ('AccessExclusive', 'RowExclusive'), ('AccessExclusive', 'ShareUpdateExclusive'),
+          ('AccessExclusive', 'Share'), ('AccessExclusive', 'ShareRowExclusive'),
+          ('AccessExclusive','Exclusive'), ('AccessExclusive','AccessExclusive')
+      ), locks as (
+          select
+              pid
+              , locktype
+              , granted
+              , relation::regclass as relation
+              , left(mode, -4) as mode
+              , row(locktype,database,relation::regclass,page,tuple,virtualxid,transactionid,classid,objid,objsubid) as obj
+          from pg_locks
+      ), pairs as (
+          select
+              w.pid as waiter
+              , l.pid as locker
+              , l.obj
+              , l.mode
+              , l.relation
+          from locks as w
+              inner join locks as l on l.obj is not distinct from w.obj
+                                   and l.locktype = w.locktype
+                                   and not l.pid = w.pid
+                                   and l.granted
+          where not w.granted
+      ), leaders as (
+          select
+              distinct(locker) as locker
+              , coalesce(relation, (select max(relation) from locks where pid = locker)) as relation
+              , mode
+          from (
+              select
+                  *
+                  , rank() over (partition by locker order by relation nulls first) as pos from pairs
+          ) as ss
+          where pos = 1
+      ), pids as (
+          select locker as pid from pairs union select waiter from pairs
+      ), activity as (
+          select
+              a.datname
+               , a.pid
+               , a.usename
+               , a.xact_start
+               , a.query_start
+               , a.state_change
+               , a.state
+               , a.wait_event_type
+               , a.wait_event
+               , a.query
+          from pg_stat_activity as a
+             inner join pids as p on p.pid = a.pid
+      ), lock_queue as (
+          select
+              array_agg(l.pid::text || '.' || l.mode order by p.query_start) as queue
+              , rel.relation
+          from locks as l
+              inner join activity p on p.pid = l.pid
+              inner join activity a on a.pid = l.pid
+              left join lateral (
+                  select coalesce(relation, max(relation)) as relation
+                  from locks
+                  where pid = l.pid
+                    and relation is not null
+                  group by relation
+              ) as rel on true
+          where not l.granted
+          group by rel.relation
+      ), push_root_on_lock_queue as (
+          select
+              l.relation
+              , array_prepend(p.locker::text || '.' || p.mode, queue) as queue
+          from lock_queue as l
+              inner join leaders as p on p.relation = l.relation
+      ), lock_queue_element_num as (
+          select
+              relation
+              , a.element
+              , a.num
+          from push_root_on_lock_queue, unnest(queue) with ordinality a(element, num)
+      ), main as (
+          select
+              a.relation
+              , split_part(a.element, '.', 1) as prev_pid
+              , split_part(a.element, '.', 2) as prev_mode
+              , split_part(b.element, '.', 1) as pid
+              , split_part(b.element, '.', 2) as mode
+              , a.num as start
+              , b.num as next
+              , exists(
+                    select null
+                    from conflicts as c
+                    where c.lock = split_part(a.element, '.', 2)
+                      and c.conflict = split_part(b.element, '.', 2)) as conflict
+          from lock_queue_element_num as a
+              inner join lock_queue_element_num b on a.relation = b.relation
+          where a.num < b.num
+          order by b.num desc
+      ), tree as (
+          select
+              distinct on (pid, prev_pid)
+              *
+              , dense_rank() over (partition by relation order by start) - 1 as level
+          from main
+      ), stat as (
+          select
+              m.pid
+              , p.locker
+              , p.relation
+              , array_agg(distinct m.prev_pid || ':' || m.level) as blocked_by
+          from pairs as p
+              inner join tree as m on p.waiter = m.pid::int
+          where conflict
+            and m.pid != m.prev_pid
+          group by m.pid, p.locker, p.relation
+      ), sub as (
+          select
+              pidd
+              , count(pidd) as blocked_cnt
+          from (
+              select distinct on (pid)
+                  split_part(unnest(blocked_by), ':', 1) as pidd
+              from stat as s
+               ) as blocked_cnt
+          where not exists (select from pairs as p where p.locker = blocked_cnt.pidd::int)
+          group by pidd
+      ), result as (
+          select
+              distinct(s.pid::int) as pid
+              , split_part(s.blocked_by[array_upper(s.blocked_by, 1)], ':', 1)::int as root_pid
+              , s.blocked_by
+              , extract(epoch from(clock_timestamp() - a.xact_start)) as ts_age
+              , extract(epoch from(clock_timestamp() - a.state_change)) as change_age
+              , replace(a.state, 'idle in transaction', 'idletx') as state
+              , a.datname
+              , a.usename
+              , a.wait_event_type || ':' || a.wait_event as wait
+              , blocked.cnt as blocked_cnt
+              , trim(trailing ';' from format('%s %s', coalesce(repeat('.', array_length(s.blocked_by, 1) + 1), '')
+                                            , left(query, 100))) as query
+              , query as query_full
+              , array_length(s.blocked_by, 1) as level
+              , s.relation
+          from stat as s
+            inner join activity as a on s.pid::int = a.pid
+            left join lateral (
+                select
+                    coalesce((case when count(p.waiter) = 0
+                                   then
+                                       (select blocked_cnt
+                                        from sub
+                                        where sub.pidd = s.pid
+                                        union all
+                                        select 0
+                                        from sub
+                                        where not exists (select from sub where sub.pidd = s.pid))
+                                   else count(p.waiter)
+                              end), 0) as cnt
+                from pairs as p where p.locker = s.pid::int) as blocked on true
+          union all
+          select
+              distinct(p.locker::int)
+              , p.locker::int as root_pid
+              , '{}'::text[] as blocked_by
+              , extract(epoch from(clock_timestamp() - a.xact_start)) as ts_age
+              , extract(epoch from(clock_timestamp() - a.state_change)) as change_age
+              , replace(state, 'idle in transaction', 'idletx') as state
+              , a.datname
+              , a.usename
+              , a.wait_event_type || ':' || a.wait_event as wait
+              , blocked.cnt as blocked_cnt
+              , left(query, 100) as query
+              , query as query_full
+              , 0 as level
+              , p.relation
+          from pairs as p
+              inner join activity as a on p.locker::int = a.pid
+              left join lateral (
+                  select count(t.prev_pid) as cnt
+                  from tree t
+                  where t.prev_pid = p.locker::text) as blocked on true
+          where not exists (select from stat as s where s.pid::int = p.locker)
+      )
+      select
+          r.datname
+          , r.state
+          , r.wait as wait_event
+          , r.query
+          , md5(regexp_replace(regexp_replace(regexp_replace(regexp_replace(r.query_full, '\(\s*\?.[^\)]*\)|\(\s*\$.[^\)]*\)', '(***)', 'g'), E'[ \\t\\n\\r\\s+]+', ' ', 'g'), '\(\*\*\*\)[\s,\(\*\)]*\(\*\*\*\)', '(***)...(***)', 'g'),'([\_\-\$=, ])[0-9]+','\1#', 'g')::text) as queryid
+          , extract(epoch from clock_timestamp()) as pg_lock_cur_time
+          , r.blocked_cnt as pg_lock_blocked_cnt
+          , r.ts_age as pg_lock_ts_age
+          , r.change_age as pg_lock_change_age
+          , r.root_pid as pg_lock_root_pid
+          , r.level as pg_lock_level
+          , r.pid as pg_lock_pid
+      from result as r
+      where r.change_age > 60
+  - query_name: logical_replication_stats
+    query: |
+      SELECT
+        repsl.slot_name
+        , repsl.active::int
+        , psr.sync_state
+        , repsl.database
+        , psr.application_name
+        , psr.client_addr
+        , pg_wal_lsn_diff(pg_current_wal_lsn(), repsl.restart_lsn) as logical_replication_lag_bytes
+      from pg_replication_slots repsl
+      left join pg_stat_replication psr on psr.pid = repsl.active_pid
+      where slot_type = 'logical'
+  - query_name: physical_replication_stats
+    query: |
+      select
+        repsl.slot_name
+        , repsl.active::int
+        , psr.sync_state
+        , pg_wal_lsn_diff(pg_current_wal_lsn(),psr.replay_lsn) as total_lag
+        , pg_wal_lsn_diff(pg_current_wal_lsn(),psr.sent_lsn) as pending_lag
+        , pg_wal_lsn_diff(sent_lsn,psr.write_lsn) as write_lag
+        , pg_wal_lsn_diff(write_lsn,psr.flush_lsn) as flush_lag
+        , pg_wal_lsn_diff(flush_lsn,psr.replay_lsn) as replay_lag
+      from pg_stat_replication psr
+            inner join pg_replication_slots repsl on psr.pid = repsl.active_pid
+      where repsl.slot_type='physical'
