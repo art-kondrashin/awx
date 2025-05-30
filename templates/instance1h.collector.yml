@@ -1,0 +1,20 @@
+collector_name: instance_1h
+min_interval: 1h
+
+metrics:
+  - metric_name: pg_database_size
+    key_labels:
+      - datname
+    type: gauge
+    help: Disk space used by the database
+    values: [pg_database_size]
+    query_ref: database_size
+
+queries:
+  - query_name: database_size
+    query: |
+      select
+          db.datname
+          , pg_database_size(db.datid) as pg_database_size
+      from pg_stat_database as db
+      where datname not in ('template1', 'template0')
