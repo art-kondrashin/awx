@@ -11,13 +11,13 @@ jobs:
     collectors: [database_1h]
     static_configs:
       - targets:
-          postgres: pgx://sql_exporter@:5432/postgres?host=/tmp&application_name=sql_exporter&target_session_attrs=primary
+          postgres: pgx://sql_exporter@:5432/postgres?host=localhost&application_name=sql_exporter&target_session_attrs=primary
 
   - job_name: instance_metrics
     collectors: [instance_10s, instance_1m, instance_1h]
     static_configs:
       - targets:
-          base: pgx://sql_exporter@:5432/postgres?host=/tmp&application_name=sql_exporter&target_session_attrs=primary
+          base: pgx://sql_exporter@:5432/postgres?host=localhost&application_name=sql_exporter&target_session_attrs=primary
 
 collector_files:
   - "*.collector.yml"
