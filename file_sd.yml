@@ -22,16 +22,6 @@
         file: sql_exporter.json
     output_dir: /etc/prometheus/file_sd
 
-  tasks:
-    - name: Убедимся, что директория есть
-      become: yes
-      file:
-        path: "{{ output_dir }}"
-        state: directory
-        owner: prometheus
-        group: prometheus
-        mode: '0755'
-
     - name: Генерим файлы для экспортеров
       template:
         src: templates/file_sd.json.j2
