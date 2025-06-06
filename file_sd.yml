@@ -12,6 +12,7 @@
 - name: Генерируем конфиги Prometheus на бастионе
   hosts: localhost
   gather_facts: false
+  become: true
   vars:
     exporters:
       - job: node_exporter
@@ -30,7 +31,7 @@
         owner: prometheus
         group: prometheus
         mode: '0755'
-        become: yes
+        
 
     - name: Генерим файлы для экспортеров
       template:
@@ -39,7 +40,6 @@
         owner: prometheus
         group: prometheus
         mode: '0644'
-        become: yes
       loop: "{{ exporters }}"
       loop_control:
         label: "{{ item.file }}"
