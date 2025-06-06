@@ -1,5 +1,5 @@
 [
-{% for host in ansible_play_hosts_all %}
+{% for host in shardman %}
   {
     "targets": ["{{ host.ip }}:{{ exporter_port }}"],
     "labels": {
