@@ -1,62 +1,40 @@
 ---
-
-- hosts: shardman
-  gather_facts: true            
-  tasks: []                    
-
-- hosts: bastion       
-  gather_facts: false
-  become: true             
-  run_once: true
+- name: generate file node_exporter1
+  hosts: all             
+  become: yes
+  serial: 1                
 
   vars:
-    exporters:
-      - { name: node_exporter, port: 9100 }
-      - { name: sql_exporter,  port: 9399 }
-    output_dir: /etc/prometheus/file_sd
-    prometheus_user: prometheus
-    prometheus_group: prometheus
+    # ====== Node Exporter ======
+    node_exporter_version: "1.9.1"
+    node_exporter_user: "node_exporter"
+    node_exporter_bin_dir: "/usr/local/bin"
+    node_exporter_unit: "/etc/systemd/system/node_exporter.service"
+
+    # ====== Prometheus (на AWX-хосте) ======
+    prometheus_config: "/etc/prometheus/prometheus.yml"
+    prometheus_service: "prometheus"
+
+    # autodetect arch: x86_64 → amd64, aarch64 → arm64, иначе armv7
+    node_exporter_arch: >-
+      {{ 'amd64'  if ansible_architecture == 'x86_64'  else
+         'arm64'  if ansible_architecture == 'aarch64' else
+         'armv7' }}
+
+    node_exporter_url: >-
+      https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}.tar.gz
+
+    node_target: "{{ (ansible_host | default(inventory_hostname)) }}:9100"
 
   tasks:
-    - name: debug per-host facts
-      debug:
-        msg: "host={{ item }} ip={{ hostvars[item].ansible_default_ipv4.address }}"
-      loop: "{{ groups['shardman'] }}"
 
-    - name: build all_targets list
-      set_fact:
-        all_targets: "{{ groups['shardman']
-                         | map('extract', hostvars)
-                         | map('json_query', '{ip: ansible_default_ipv4.address, hostname: inventory_hostname}')
-                         | list }}"
-
-
-    - debug:
-        var: all_targets
-
-
-    - file:
-        path: "{{ output_dir }}"
-        state: directory
-        owner: "{{ prometheus_user }}"
-        group: "{{ prometheus_group }}"
-        mode: '0755'
-
-    - name: render {{ item.name }}.json
+    # ---------- Регистрируем target в Prometheus ----------
+    - name: Render node_exporter SD file
       template:
-        src: file_sd.json.j2
-        dest: "{{ output_dir }}/{{ item.name }}.json"
-        owner: "{{ prometheus_user }}"
-        group: "{{ prometheus_group }}"
-        mode: '0644'
-      loop: "{{ exporters }}"
-      vars:
-        targets: "{{ all_targets }}"
-        exporter_port: "{{ item.port }}"
-
-    - name: cat rendered file
-      shell: cat {{ output_dir }}/{{ item.name }}.json | jq .
-      register: rendered
-      loop: "{{ exporters }}"
-      changed_when: false
-    - debug: var=rendered.stdout_lines
+        src: node_exporter.json.j2
+        dest: /etc/prometheus/file_sd/node_exporter1.json
+        owner: prometheus
+        group: prometheus
+        mode: "0644"
+      delegate_to: 185.86.146.169
+      become: yes
