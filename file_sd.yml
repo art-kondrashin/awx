@@ -17,10 +17,9 @@
     - name: Render node_exporter SD file
       template:
         src: file_sd.json.j2
-        dest: /etc/prometheus/file_sd/node_exporter1.json
+        dest: /etc/prometheus/file_sd/sql_exporter1.json
         owner: prometheus
         group: prometheus
         mode: "0644"
-      loop: "{{ exporters }}"  
       delegate_to: 185.86.146.169
       become: yes
