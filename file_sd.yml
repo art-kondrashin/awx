@@ -17,40 +17,35 @@
     output_dir: /etc/prometheus/file_sd
 
   tasks:
-    - name: Collect host data
+    - name: Collect host data from all hosts
       set_fact:
         targets_data: >-
-          {{
-            groups['all'] | map('extract', hostvars) | map('combine', {
-              'ip': attribute('ansible_default_ipv4.address'),
-              'hostname': attribute('ansible_hostname')
-            }) | list
-          }}
+          {{ groups['all'] | map('extract', hostvars) | map('combine', {
+              'ip': hostvars[item].ansible_default_ipv4.address,
+              'hostname': hostvars[item].ansible_hostname
+          }) | list }}
+      vars:
+        item: "{{ item }}"
+      loop: "{{ groups['all'] }}"
+      run_once: true
 
-    - name: Build targets per exporter
+    - name: Flatten targets per exporter
       set_fact:
-        exporter_targets: >-
-          {{
-            dict(
-              exporters | map(attribute='job') | zip(
-                exporters | map('combine', {'targets': []})
-              )
-            )
-          }}
+        exporter_targets: "{{ dict(exporters | map(attribute='job') | zip(exporters | map('combine', {'targets': []}))) }}"
 
-    - name: Fill exporter_targets
+    - name: Fill exporter_targets with targets
       set_fact:
         exporter_targets: >-
           {{
             exporter_targets | combine(
               dict(
-                exporters | map('extract', exporters) | map('combine', {
+                exporters | map('combine', {
                   'targets': targets_data | map('combine', {
-                    'targets': [ attribute('ip') ~ ":" ~ item.port ],
+                    'targets': [ item.ip ~ ':' ~ exporter.port ],
                     'labels': {
-                      'ip': attribute('ip'),
-                      'hostname': attribute('hostname'),
-                      'job': item.job
+                      'ip': item.ip,
+                      'hostname': item.hostname,
+                      'job': exporter.job
                     }
                   }) | list
                 }) | map(attribute='job') | zip(_) | list
@@ -58,6 +53,8 @@
             )
           }}
       loop: "{{ exporters }}"
+      loop_control:
+        loop_var: exporter
 
     - name: Render JSON files using template
       template:
