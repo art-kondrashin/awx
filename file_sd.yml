@@ -1,5 +1,5 @@
 ---
-- name: generate file node_exporter1
+- name: generate file
   hosts: shardman             
   become: yes
   serial: 1                
@@ -13,7 +13,6 @@
     prometheus_group: prometheus
 
   tasks:
-
     # ---------- Регистрируем target в Prometheus ----------
     - name: Render node_exporter SD file
       template:
