@@ -17,46 +17,44 @@
     output_dir: /etc/prometheus/file_sd
 
   tasks:
-    - name: Collect host data from all hosts
+    - name: Collect host data
       set_fact:
-        targets_data: "{{ targets_data | default([]) + [ {
-          'ip': hostvars[item].ansible_default_ipv4.address,
-          'hostname': hostvars[item].ansible_hostname
-        } ] }}"
-      loop: "{{ groups['all'] }}"
-      loop_control:
-        loop_var: item
+        all_targets_data: >-
+          {{
+            groups['all'] | map('extract', hostvars) | map('extract', ['ansible_default_ipv4', 'address']) |
+            zip(groups['all'] | map('extract', hostvars) | map(attribute='ansible_hostname')) |
+            map('community.general.dict_kv', ['ip', 'hostname']) | list
+          }}
       run_once: true
 
-    - name: Initialize exporter_targets structure
+    - name: Build targets for each exporter
       set_fact:
-        exporter_targets: "{{ dict(exporters | map(attribute='job') | zip(exporters | map('combine', {'targets': []}))) }}"
-
-    - name: Fill exporter_targets with targets
-      set_fact:
-        exporter_targets: >-
-          {{
-            exporter_targets | combine({
-              exporter.job: {
-                'file': exporter.file,
-                'targets': targets_data | map('combine', {
-                  'targets': [ item.ip ~ ':' ~ exporter.port ],
-                  'labels': {
-                    'ip': item.ip,
-                    'hostname': item.hostname,
-                    'job': exporter.job
-                  }
-                }) | list
+        exporter_targets: "{{ exporter_targets | default({}) | combine({ item.job: {
+          'file': item.file,
+          'targets': (
+            all_targets_data | map('combine', {
+              'targets': [ (target.ip ~ ':' ~ item.port) ],
+              'labels': {
+                'ip': target.ip,
+                'hostname': target.hostname,
+                'job': item.job
               }
-            }, recursive=True)
-          }}
+            })
+          | list )
+        }}) }}"
       loop: "{{ exporters }}"
       loop_control:
-        loop_var: exporter
+        loop_var: item
       vars:
-        # переопределяем item внутри map(), чтобы избежать коллизий с loop_var
-        targets_data: "{{ targets_data }}"
-        item: "{{ item }}"  # костыль, чтоб внутри map работало — Ansible странно себя ведёт без этого
+        # чтобы не ловить ошибку с undefined
+        all_targets_data: "{{ all_targets_data | default([]) }}"
+        target: "{{ item0 }}"
+      with_items: "{{ exporters }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.job }}"
+      delegate_to: localhost
+      run_once: true
 
     - name: Ensure output directory exists
       file:
@@ -66,7 +64,7 @@
         group: prometheus
         mode: '0755'
 
-    - name: Render JSON files for each exporter
+    - name: Write file_sd JSON files
       template:
         src: templates/file_sd.json.j2
         dest: "{{ output_dir }}/{{ item.value.file }}"
