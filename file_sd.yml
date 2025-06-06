@@ -17,7 +17,7 @@
     # ---------- Регистрируем target в Prometheus ----------
     - name: Render node_exporter SD file
       template:
-        src: node_exporter.json.j2
+        src: file_sd.json.j2
         dest: /etc/prometheus/file_sd/node_exporter1.json
         owner: prometheus
         group: prometheus
