@@ -25,14 +25,6 @@
     prometheus_group: prometheus
 
   tasks:
-    - name: Убедиться, что директория для file_sd существует
-      file:
-        path: "{{ output_dir }}"
-        state: directory
-        owner: "{{ prometheus_owner }}"
-        group: "{{ prometheus_group }}"
-        mode: '0755'
-
     - name: Создать файл для каждого экспортера
       template:
         src: templates/file_sd.json.j2
