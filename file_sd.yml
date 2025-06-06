@@ -1,10 +1,10 @@
 ---
 
-- hosts: all
+- hosts: shardman
   gather_facts: true            
   tasks: []                    
 
-- hosts: bastion-ubuntu       
+- hosts: bastion       
   gather_facts: false
   become: true             
   run_once: true
@@ -21,11 +21,11 @@
     - name: debug per-host facts
       debug:
         msg: "host={{ item }} ip={{ hostvars[item].ansible_default_ipv4.address }}"
-      loop: "{{ groups['all'] }}"
+      loop: "{{ groups['shardman'] }}"
 
     - name: build all_targets list
       set_fact:
-        all_targets: "{{ groups['all']
+        all_targets: "{{ groups['shardman']
                          | map('extract', hostvars)
                          | map('json_query', '{ip: ansible_default_ipv4.address, hostname: inventory_hostname}')
                          | list }}"
