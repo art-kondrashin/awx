@@ -1,43 +1,39 @@
 ---
-- name: Collect IP + hostname on every host
-  hosts: shardman
-  gather_facts: true
-  tasks:
-    - set_fact:
-        exporter_targets:
-          ip: "{{ ansible_default_ipv4.address }}"
-          hostname: "{{ inventory_hostname }}"
-
-- name: Build Prometheus file_sd JSON on bastion
-  hosts: bastion                 
+- hosts: bastion           
   gather_facts: false
-  become: yes
+  become: true               
   vars:
-    ansible_become_exe: /usr/bin/sudo  
     exporters:
       - { name: node_exporter, port: 9100 }
       - { name: sql_exporter,  port: 9399 }
     output_dir: /etc/prometheus/file_sd
     prometheus_user: prometheus
     prometheus_group: prometheus
-  tasks:
-    - set_fact:
-        all_targets: "{{ groups['all'] | map('extract', hostvars, 'exporter_targets') | list }}"
 
-    - name: Ensure output directory exists
-      become: true
-      delegate_to: 185.86.146.169
-      file:
+  pre_tasks:
+    - name: get facts
+      delegate_to: "{{ item }}"
+      setup:
+      loop: "{{ groups['shardman'] }}"
+      run_once: true
+
+    - name: perform list all_targets
+      set_fact:
+        all_targets: []
+    - set_fact:
+        all_targets: "{{ all_targets + [ {'ip': hostvars[item]['ansible_default_ipv4']['address'], 'hostname': item} ] }}"
+      loop: "{{ groups['shardman'] }}"
+      run_once: true
+
+  tasks:
+    - file:
         path: "{{ output_dir }}"
         state: directory
         owner: "{{ prometheus_user }}"
         group: "{{ prometheus_group }}"
         mode: '0755'
 
-    - name: Render JSON files
-      become: true
-      delegate_to: 185.86.146.169
-      template:
+    - template:
         src: file_sd.json.j2
         dest: "{{ output_dir }}/{{ item.name }}.json"
         owner: "{{ prometheus_user }}"
