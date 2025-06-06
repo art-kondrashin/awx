@@ -22,9 +22,8 @@
   tasks:
     - set_fact:
         all_targets: "{{ groups['all'] | map('extract', hostvars, 'exporter_targets') | list }}"
-      ansible.builtin.debug:
-      msg: {{ all_targets }}
-
+        msg: {{ all_targets }}
+        
     - name: Render JSON files
       become: true
       delegate_to: 185.86.146.169
