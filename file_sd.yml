@@ -10,6 +10,7 @@
 
 - name: Build Prometheus file_sd JSON on bastion            
   gather_facts: false
+  host: localhost
   vars:   
     exporters:
       - { name: node_exporter, port: 9100 }
