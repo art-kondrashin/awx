@@ -3,7 +3,7 @@
   {
     "targets": ["{{ host.ip }}:{{ exporter_port }}"],
     "labels": {
-      "ip": "{{ host.ip }}",
+      "ip": "{{ (hostvars[host].ansible_host | default(host)) }}",
       "hostname": "{{ host.hostname }}"
     }
   }{% if not loop.last %},{% endif %}
