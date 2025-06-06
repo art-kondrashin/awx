@@ -1,9 +1,15 @@
 ---
-- name: Собираем факты с удалённых хостов
+- name: Собираем IP и hostname с хостов
   hosts: all
   gather_facts: true
+  tasks:
+    - name: Формируем список нужных данных
+      set_fact:
+        collected_hosts: "{{ collected_hosts | default([]) + [ {'ip': ansible_default_ipv4.address, 'hostname': ansible_hostname} ] }}"
+      delegate_to: localhost
+      run_once: true
 
-- name: Формируем file_sd конфиги на бастионе
+- name: Генерируем конфиги Prometheus на бастионе
   hosts: localhost
   gather_facts: false
   vars:
@@ -17,18 +23,7 @@
     output_dir: /etc/prometheus/file_sd
 
   tasks:
-    - name: Собираем список хостов
-      set_fact:
-        target_list: >-
-          {{
-            groups['all'] | map('extract', hostvars) | map('combine', {
-              'ip': attribute('ansible_default_ipv4.address'),
-              'hostname': attribute('ansible_hostname')
-            }) | list
-          }}
-      run_once: true
-
-    - name: Убедимся, что директория существует
+    - name: Убедимся, что директория есть
       file:
         path: "{{ output_dir }}"
         state: directory
@@ -36,7 +31,7 @@
         group: prometheus
         mode: '0755'
 
-    - name: Шаблонизируем файл для каждого экспортера
+    - name: Генерим файлы для экспортеров
       template:
         src: templates/file_sd.j2
         dest: "{{ output_dir }}/{{ item.file }}"
@@ -47,6 +42,6 @@
       loop_control:
         label: "{{ item.file }}"
       vars:
+        hosts: "{{ hostvars['localhost']['collected_hosts'] }}"
         port: "{{ item.port }}"
         job: "{{ item.job }}"
-        hosts: "{{ target_list }}"
