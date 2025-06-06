@@ -1,16 +1,19 @@
 ---
-- name: Собрать данные с хостов
+- name: Собрать IP и hostname с хостов
   hosts: all
   gather_facts: true
   become: true
   tasks:
-    - name: Сохраняем IP и hostname каждого хоста
-      set_fact:
-        collected_hosts: "{{ collected_hosts | default([]) + [ { 'ip': ansible_default_ipv4.address, 'hostname': inventory_hostname } ] }}"
-      run_once: true
+    - name: Добавляем IP и имя хоста в список
       delegate_to: localhost
+      run_once: true
+      set_fact:
+        exporter_targets: "{{ exporter_targets | default([]) + [ {'ip': hostvars[item].ansible_default_ipv4.address, 'hostname': item} ] }}"
+      loop: "{{ ansible_play_hosts }}"
+      loop_control:
+        loop_var: item
 
-- name: Сгенерировать file_sd файлы на бастионе
+- name: Генерируем файлы для Prometheus
   hosts: localhost
   gather_facts: false
   become: true
@@ -24,7 +27,7 @@
     prometheus_user: prometheus
     prometheus_group: prometheus
   tasks:
-    - name: Генерируем файл для каждого экспортера
+    - name: Генерируем JSON файлы
       template:
         src: templates/file_sd.json.j2
         dest: "{{ output_dir }}/{{ item.name }}.json"
@@ -33,4 +36,5 @@
         mode: '0644'
       loop: "{{ exporters }}"
       vars:
-        host_list: "{{ hostvars.localhost.collected_hosts }}"
+        targets: "{{ hostvars['localhost'].exporter_targets }}"
+        exporter_port: "{{ item.port }}"
