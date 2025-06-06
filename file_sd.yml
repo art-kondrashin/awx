@@ -9,11 +9,10 @@
           hostname: "{{ inventory_hostname }}"
 
 - name: Build Prometheus file_sd JSON on bastion
-  hosts: localhost
-  connection: local                 
+  hosts: all                
   gather_facts: false
   vars:
-    ansible_become_exe: /usr/bin/sudo   # явный путь к sudo
+    ansible_become_exe: /usr/bin/sudo   
     exporters:
       - { name: node_exporter, port: 9100 }
       - { name: sql_exporter,  port: 9399 }
