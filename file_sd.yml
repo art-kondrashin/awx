@@ -1,40 +1,42 @@
 ---
-- name: Собрать IP и hostname с хостов
+- name: Collect IP + hostname on each host
   hosts: all
   gather_facts: true
-  become: true
   tasks:
-    - name: Добавляем IP и имя хоста в список
-      delegate_to: localhost
-      run_once: true
-      set_fact:
-        exporter_targets: "{{ exporter_targets | default([]) + [ {'ip': hostvars[item].ansible_default_ipv4.address, 'hostname': item} ] }}"
-      loop: "{{ ansible_play_hosts }}"
-      loop_control:
-        loop_var: item
+    - set_fact:
+        exporter_targets:
+          ip: "{{ ansible_default_ipv4.address }}"
+          hostname: "{{ inventory_hostname }}"
 
-- name: Генерируем файлы для Prometheus
+- name: Render file_sd json
   hosts: localhost
   gather_facts: false
   become: true
   vars:
     exporters:
-      - name: node_exporter
-        port: 9100
-      - name: sql_exporter
-        port: 9399
+      - { name: node_exporter, port: 9100 }
+      - { name: sql_exporter,  port: 9399 }
     output_dir: /etc/prometheus/file_sd
     prometheus_user: prometheus
     prometheus_group: prometheus
   tasks:
-    - name: Генерируем JSON файлы
-      template:
-        src: templates/file_sd.json.j2
+    - set_fact:
+        all_targets: "{{ groups['all'] | map('extract', hostvars, 'exporter_targets') | list }}"
+
+    - file:
+        path: "{{ output_dir }}"
+        state: directory
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_group }}"
+        mode: '0755'
+
+    - template:
+        src: file_sd.json.j2
         dest: "{{ output_dir }}/{{ item.name }}.json"
         owner: "{{ prometheus_user }}"
         group: "{{ prometheus_group }}"
         mode: '0644'
       loop: "{{ exporters }}"
       vars:
-        targets: "{{ hostvars['localhost'].exporter_targets }}"
+        targets: "{{ all_targets }}"
         exporter_port: "{{ item.port }}"
