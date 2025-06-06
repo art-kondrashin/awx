@@ -1,7 +1,7 @@
 [
-{% for host in host_data %}
+{% for host in targets %}
   {
-    "targets": ["{{ host.ip }}:{{ item.port }}"],
+    "targets": ["{{ host.ip }}:{{ exporter_port }}"],
     "labels": {
       "instance": "{{ host.ip }}",
       "hostname": "{{ host.hostname }}"
