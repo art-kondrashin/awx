@@ -1,6 +1,6 @@
 ---
 - name: Collect IP + hostname on every host
-  hosts: all
+  hosts: shardman
   gather_facts: true
   tasks:
     - set_fact:
@@ -9,7 +9,7 @@
           hostname: "{{ inventory_hostname }}"
 
 - name: Build Prometheus file_sd JSON on bastion
-  hosts: bastion-ubuntu
+  hosts: bastion
   gather_facts: false
   vars:
     ansible_become_exe: /usr/bin/sudo   
