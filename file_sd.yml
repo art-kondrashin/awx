@@ -33,7 +33,7 @@
 
     - name: Генерим файлы для экспортеров
       template:
-        src: templates/file_sd.j2
+        src: templates/file_sd.json.j2
         dest: "{{ output_dir }}/{{ item.file }}"
         owner: prometheus
         group: prometheus
