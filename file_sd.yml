@@ -1,7 +1,14 @@
 ---
-- hosts: bastion           
+
+- hosts: all
+  gather_facts: true            
+  tasks: []                    
+
+- hosts: bastion-ubuntu       
   gather_facts: false
-  become: true               
+  become: true             
+  run_once: true
+
   vars:
     exporters:
       - { name: node_exporter, port: 9100 }
@@ -10,22 +17,24 @@
     prometheus_user: prometheus
     prometheus_group: prometheus
 
-  pre_tasks:
-    - name: get facts
-      delegate_to: "{{ item }}"
-      setup:
-      loop: "{{ groups['shardman'] }}"
-      run_once: true
-
-    - name: perform list all_targets
-      set_fact:
-        all_targets: []
-    - set_fact:
-        all_targets: "{{ all_targets + [ {'ip': hostvars[item]['ansible_default_ipv4']['address'], 'hostname': item} ] }}"
-      loop: "{{ groups['shardman'] }}"
-      run_once: true
-
   tasks:
+    - name: debug per-host facts
+      debug:
+        msg: "host={{ item }} ip={{ hostvars[item].ansible_default_ipv4.address }}"
+      loop: "{{ groups['all'] }}"
+
+    - name: build all_targets list
+      set_fact:
+        all_targets: "{{ groups['all']
+                         | map('extract', hostvars)
+                         | map('json_query', '{ip: ansible_default_ipv4.address, hostname: inventory_hostname}')
+                         | list }}"
+
+
+    - debug:
+        var: all_targets
+
+
     - file:
         path: "{{ output_dir }}"
         state: directory
@@ -33,7 +42,8 @@
         group: "{{ prometheus_group }}"
         mode: '0755'
 
-    - template:
+    - name: render {{ item.name }}.json
+      template:
         src: file_sd.json.j2
         dest: "{{ output_dir }}/{{ item.name }}.json"
         owner: "{{ prometheus_user }}"
@@ -43,3 +53,10 @@
       vars:
         targets: "{{ all_targets }}"
         exporter_port: "{{ item.port }}"
+
+    - name: cat rendered file
+      shell: cat {{ output_dir }}/{{ item.name }}.json | jq .
+      register: rendered
+      loop: "{{ exporters }}"
+      changed_when: false
+    - debug: var=rendered.stdout_lines
