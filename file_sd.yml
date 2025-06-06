@@ -24,15 +24,6 @@
     - set_fact:
         all_targets: "{{ groups['all'] | map('extract', hostvars, 'exporter_targets') | list }}"
 
-    - name: Ensure output directory exists
-      become: true
-      file:
-        path: "{{ output_dir }}"
-        state: directory
-        owner: "{{ prometheus_user }}"
-        group: "{{ prometheus_group }}"
-        mode: '0755'
-
     - name: Render JSON files
       become: true
       template:
