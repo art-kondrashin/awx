@@ -19,14 +19,13 @@
   tasks:
     - name: Collect host data from all hosts
       set_fact:
-        targets_data: >-
-          {{ groups['all'] | map('extract', hostvars) | map('combine', {
-              'ip': hostvars[item].ansible_default_ipv4.address,
-              'hostname': hostvars[item].ansible_hostname
-          }) | list }}
-      vars:
-        item: "{{ item }}"
+        targets_data: "{{ targets_data | default([]) + [ {
+          'ip': hostvars[item].ansible_default_ipv4.address,
+          'hostname': hostvars[item].ansible_hostname
+        } ] }}"
       loop: "{{ groups['all'] }}"
+      loop_control:
+        loop_var: item
       run_once: true
 
     - name: Flatten targets per exporter
