@@ -9,7 +9,7 @@
           hostname: "{{ inventory_hostname }}"
 
 - name: Build Prometheus file_sd JSON on bastion
-  hosts: all                
+  hosts: ubuntu-bastion                
   gather_facts: false
   vars:
     ansible_become_exe: /usr/bin/sudo   
