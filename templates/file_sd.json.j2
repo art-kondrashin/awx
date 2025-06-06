@@ -3,7 +3,7 @@
   {
     "targets": ["{{ host.ip }}:{{ exporter_port }}"],
     "labels": {
-      "instance": "{{ host.ip }}",
+      "ip": "{{ host.ip }}",
       "hostname": "{{ host.hostname }}"
     }
   }{% if not loop.last %},{% endif %}
