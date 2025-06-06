@@ -22,7 +22,6 @@
   tasks:
     - set_fact:
         all_targets: "{{ groups['all'] | map('extract', hostvars, 'exporter_targets') | list }}"
-        msg: {{ all_targets }}
         
     - name: Render JSON files
       become: true
