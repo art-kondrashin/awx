@@ -1,9 +1,9 @@
 ---
-- name: Gather target facts
+- name: Собираем факты с удалённых хостов
   hosts: all
   gather_facts: true
 
-- name: Generate Prometheus file_sd configs on bastion
+- name: Формируем file_sd конфиги на бастионе
   hosts: localhost
   gather_facts: false
   vars:
@@ -17,46 +17,18 @@
     output_dir: /etc/prometheus/file_sd
 
   tasks:
-    - name: Collect host data
+    - name: Собираем список хостов
       set_fact:
-        all_targets_data: >-
+        target_list: >-
           {{
-            groups['all'] | map('extract', hostvars) | map('extract', ['ansible_default_ipv4', 'address']) |
-            zip(groups['all'] | map('extract', hostvars) | map(attribute='ansible_hostname')) |
-            map('community.general.dict_kv', ['ip', 'hostname']) | list
+            groups['all'] | map('extract', hostvars) | map('combine', {
+              'ip': attribute('ansible_default_ipv4.address'),
+              'hostname': attribute('ansible_hostname')
+            }) | list
           }}
       run_once: true
 
-    - name: Build targets for each exporter
-      set_fact:
-        exporter_targets: "{{ exporter_targets | default({}) | combine({ item.job: {
-          'file': item.file,
-          'targets': (
-            all_targets_data | map('combine', {
-              'targets': [ (target.ip ~ ':' ~ item.port) ],
-              'labels': {
-                'ip': target.ip,
-                'hostname': target.hostname,
-                'job': item.job
-              }
-            })
-          | list )
-        }}) }}"
-      loop: "{{ exporters }}"
-      loop_control:
-        loop_var: item
-      vars:
-        # чтобы не ловить ошибку с undefined
-        all_targets_data: "{{ all_targets_data | default([]) }}"
-        target: "{{ item0 }}"
-      with_items: "{{ exporters }}"
-      loop_control:
-        loop_var: item
-        label: "{{ item.job }}"
-      delegate_to: localhost
-      run_once: true
-
-    - name: Ensure output directory exists
+    - name: Убедимся, что директория существует
       file:
         path: "{{ output_dir }}"
         state: directory
@@ -64,11 +36,17 @@
         group: prometheus
         mode: '0755'
 
-    - name: Write file_sd JSON files
+    - name: Шаблонизируем файл для каждого экспортера
       template:
-        src: templates/file_sd.json.j2
-        dest: "{{ output_dir }}/{{ item.value.file }}"
+        src: templates/file_sd.j2
+        dest: "{{ output_dir }}/{{ item.file }}"
         owner: prometheus
         group: prometheus
         mode: '0644'
-      loop: "{{ exporter_targets | dict2items }}"
+      loop: "{{ exporters }}"
+      loop_control:
+        label: "{{ item.file }}"
+      vars:
+        port: "{{ item.port }}"
+        job: "{{ item.job }}"
+        hosts: "{{ target_list }}"
