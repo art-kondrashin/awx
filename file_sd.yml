@@ -24,6 +24,7 @@
 
   tasks:
     - name: Убедимся, что директория есть
+      become: root
       file:
         path: "{{ output_dir }}"
         state: directory
