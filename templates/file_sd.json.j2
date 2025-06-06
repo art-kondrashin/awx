@@ -1,11 +1,10 @@
 [
-{% for h in hosts %}
+{% for host in host_data %}
   {
-    "targets": ["{{ h.ip }}:{{ port }}"],
+    "targets": ["{{ host.ip }}:{{ item.port }}"],
     "labels": {
-      "ip": "{{ h.ip }}",
-      "hostname": "{{ h.hostname }}",
-      "job": "{{ job }}"
+      "instance": "{{ host.ip }}",
+      "hostname": "{{ host.hostname }}"
     }
   }{% if not loop.last %},{% endif %}
 {% endfor %}
