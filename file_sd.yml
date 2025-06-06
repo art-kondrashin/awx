@@ -1,5 +1,5 @@
 ---
-- name: Collect IP + hostname on each host
+- name: Collect IP + hostname on every host
   hosts: all
   gather_facts: true
   tasks:
@@ -8,11 +8,12 @@
           ip: "{{ ansible_default_ipv4.address }}"
           hostname: "{{ inventory_hostname }}"
 
-- name: Render file_sd json
+- name: Build Prometheus file_sd JSON on bastion
   hosts: localhost
+  connection: local                
   gather_facts: false
-  become: true
   vars:
+    ansible_become_exe: /usr/bin/sudo   
     exporters:
       - { name: node_exporter, port: 9100 }
       - { name: sql_exporter,  port: 9399 }
@@ -23,14 +24,18 @@
     - set_fact:
         all_targets: "{{ groups['all'] | map('extract', hostvars, 'exporter_targets') | list }}"
 
-    - file:
+    - name: Ensure output directory exists
+      become: true
+      file:
         path: "{{ output_dir }}"
         state: directory
         owner: "{{ prometheus_user }}"
         group: "{{ prometheus_group }}"
         mode: '0755'
 
-    - template:
+    - name: Render JSON files
+      become: true
+      template:
         src: file_sd.json.j2
         dest: "{{ output_dir }}/{{ item.name }}.json"
         owner: "{{ prometheus_user }}"
