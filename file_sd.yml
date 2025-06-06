@@ -1,6 +1,6 @@
 ---
 - name: generate file node_exporter1
-  hosts: all             
+  hosts: shardman             
   become: yes
   serial: 1                
 
