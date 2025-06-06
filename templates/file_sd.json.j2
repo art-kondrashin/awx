@@ -1,8 +1,12 @@
 [
-{% for entry in item.value.targets %}
+{% for h in hosts %}
   {
-    "targets": {{ entry.targets | to_json }},
-    "labels": {{ entry.labels | to_json }}
+    "targets": ["{{ h.ip }}:{{ port }}"],
+    "labels": {
+      "ip": "{{ h.ip }}",
+      "hostname": "{{ h.hostname }}",
+      "job": "{{ job }}"
+    }
   }{% if not loop.last %},{% endif %}
 {% endfor %}
 ]
