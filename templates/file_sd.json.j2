@@ -1,7 +1,7 @@
 [
 {% for host in ansible_play_hosts_all %}
   {
-    "targets": ["{{ (hostvars[host].ansible_host | default(host)) }}:{{ exporter_port }}"],
+    "targets": ["{{ (hostvars[host].ansible_host | default(host)) }}:{{ exporters.port }}"],
     "labels": {
       "ip": "{{ (hostvars[host].ansible_host | default(host)) }}",
       "hostname": "{{ host.hostname }}"
