@@ -28,7 +28,7 @@
         loop_var: item
       run_once: true
 
-    - name: Flatten targets per exporter
+    - name: Initialize exporter_targets structure
       set_fact:
         exporter_targets: "{{ dict(exporters | map(attribute='job') | zip(exporters | map('combine', {'targets': []}))) }}"
 
@@ -36,26 +36,37 @@
       set_fact:
         exporter_targets: >-
           {{
-            exporter_targets | combine(
-              dict(
-                exporters | map('combine', {
-                  'targets': targets_data | map('combine', {
-                    'targets': [ item.ip ~ ':' ~ exporter.port ],
-                    'labels': {
-                      'ip': item.ip,
-                      'hostname': item.hostname,
-                      'job': exporter.job
-                    }
-                  }) | list
-                }) | map(attribute='job') | zip(_) | list
-              ), recursive=True
-            )
+            exporter_targets | combine({
+              exporter.job: {
+                'file': exporter.file,
+                'targets': targets_data | map('combine', {
+                  'targets': [ item.ip ~ ':' ~ exporter.port ],
+                  'labels': {
+                    'ip': item.ip,
+                    'hostname': item.hostname,
+                    'job': exporter.job
+                  }
+                }) | list
+              }
+            }, recursive=True)
           }}
       loop: "{{ exporters }}"
       loop_control:
         loop_var: exporter
+      vars:
+        # переопределяем item внутри map(), чтобы избежать коллизий с loop_var
+        targets_data: "{{ targets_data }}"
+        item: "{{ item }}"  # костыль, чтоб внутри map работало — Ansible странно себя ведёт без этого
 
-    - name: Render JSON files using template
+    - name: Ensure output directory exists
+      file:
+        path: "{{ output_dir }}"
+        state: directory
+        owner: prometheus
+        group: prometheus
+        mode: '0755'
+
+    - name: Render JSON files for each exporter
       template:
         src: templates/file_sd.json.j2
         dest: "{{ output_dir }}/{{ item.value.file }}"
